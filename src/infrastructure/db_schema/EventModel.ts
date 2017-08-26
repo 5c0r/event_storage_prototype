@@ -8,6 +8,6 @@ const EventSchema = new Mongoose.Schema({
     AppendDate: { type: Date, required: true }
 })
 
-const Event = Mongoose.model<IAggregateEventDbSchema>("aggregate_events", EventSchema);
+const EventModel = Mongoose.model<IAggregateEventDbSchema>("aggregate_events", EventSchema);
 
-export { EventSchema, Event }
+export { EventSchema, EventModel }

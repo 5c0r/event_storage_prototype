@@ -3,8 +3,10 @@ import { injectable } from "inversify";
 
 import 'reflect-metadata';
 
-import { IAggregateRoot, Aggregate } from "./../src/infrastructure/db_schema/Aggregate";
-import { Event } from './../src/infrastructure/db_schema/Event';
+import { AggregateModel } from "./../src/infrastructure/db_schema/AggregateModel";
+import { EventModel } from './../src/infrastructure/db_schema/EventModel';
+
+import { AggregateBase } from './../src/infrastructure/interface/IAggregate';
 
 interface IStorageEngine {
     startStream<IAggregateRoot>(): any;
@@ -26,11 +28,8 @@ export class StorageEngine implements IStorageEngine {
     }
 
     startStream<IAggregateRoot>(): any {
-        const newStream = new Aggregate({
-            _id: new Mongoose.Types.ObjectId(),
-            Version: 0,
-            LastModified: new Date()
-        })
+        const newStreamData = new AggregateBase(new Mongoose.Types.ObjectId(), 0, new Date());
+        const newStream = new AggregateModel(newStreamData);
 
         newStream.save({ safe: true, validateBeforeSave: true }, this.onEntitySave);
     }
@@ -38,6 +37,7 @@ export class StorageEngine implements IStorageEngine {
     onEntitySave = (err: Error, item: any) => {
         if (err) return console.error('Error while saving entity', err);
         console.log('SAVED ENTITY', item);
+        console.log('Exiting....');
         process.exit();
     }
 

@@ -9,6 +9,6 @@ const AggregateRootSchema = new Mongoose.Schema({
     LastModified: Date
 })
 
-const Aggregate = Mongoose.model<IAggregateRootDbSchema>("aggregate_root", AggregateRootSchema);
+const AggregateModel = Mongoose.model<IAggregateRootDbSchema>("aggregate_root", AggregateRootSchema);
 
-export { AggregateRootSchema, Aggregate }
+export { AggregateRootSchema, AggregateModel }
