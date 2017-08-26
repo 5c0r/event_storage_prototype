@@ -1,0 +1,22 @@
+{
+  "version": "0.0.1",
+  "license": "MIT",
+  "dependencies": {
+    "inversify": "^4.3.0",
+    "mongoose": "^4.11.8",
+    "reflect-metadata": "^0.1.10"
+  },
+  "devDependencies": {
+    "@types/mongodb": "^2.2.10",
+    "@types/mongoose": "^4.7.21",
+    "@types/mocha": "^2.2.42",
+    "@types/reflect-metadata": "^0.0.5",
+    "mocha": "^3.5.0",
+    "tslint": "^5.7.0",
+    "typescript": "^2.4.2"
+  },
+  "author": {
+    "email": "nmt1994@gmail.com",
+    "name": "Tri Nguyen"
+  }
+}
