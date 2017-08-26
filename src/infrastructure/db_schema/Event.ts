@@ -1,11 +1,5 @@
 import * as Mongoose from "mongoose";
-
-interface IAggregateEvent extends Mongoose.Document {
-    StreamId: AAGUID;
-    Data: any;
-    Type: string;
-    AppendDate: Date;
-}
+import { IAggregateEventDbSchema } from "./../interface/IEvent";
 
 const EventSchema = new Mongoose.Schema({
     StreamId: { type: String, required: true, index: true },
@@ -14,6 +8,6 @@ const EventSchema = new Mongoose.Schema({
     AppendDate: { type: Date, required: true }
 })
 
-const Event = Mongoose.model<IAggregateEvent>("event", EventSchema);
+const Event = Mongoose.model<IAggregateEventDbSchema>("aggregate_events", EventSchema);
 
-export { IAggregateEvent, EventSchema, Event }
+export { EventSchema, Event }

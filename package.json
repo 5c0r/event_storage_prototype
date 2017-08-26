@@ -1,4 +1,5 @@
 {
+  "name": "event_storage_prototype",
   "version": "0.0.1",
   "license": "MIT",
   "dependencies": {
@@ -11,6 +12,7 @@
     "@types/mongoose": "^4.7.21",
     "@types/mocha": "^2.2.42",
     "@types/reflect-metadata": "^0.0.5",
+    "codelyzer": "^3.1.2",
     "mocha": "^3.5.0",
     "tslint": "^5.7.0",
     "typescript": "^2.4.2"
@@ -18,5 +20,10 @@
   "author": {
     "email": "nmt1994@gmail.com",
     "name": "Tri Nguyen"
+  },
+  "scripts": {
+    "tsc": "npm run tsc",
+    "compileSample": "tsc -p tsconfig.json",
+    "runSample": "node compile_output/samples/test_run.js"
   }
 }

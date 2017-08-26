@@ -1,20 +1,14 @@
 import * as Mongoose from "mongoose";
+import { IAggregateRootDbSchema } from "./../interface/IAggregate";
 
-
-const ObjectId = Mongoose.Types.ObjectId;
-
-interface IAggregateRoot extends Mongoose.Document {
-    StreamId: AAGUID;
-    Version: number;
-    LastModified: Date;
-}
+const ObjectId = Mongoose.Schema.Types.ObjectId;
 
 const AggregateRootSchema = new Mongoose.Schema({
-    StreamId: { type: ObjectId, required: true, index: true },
+    _id: { type: ObjectId, required: true, index: true },
     Version: Number,
     LastModified: Date
 })
 
-const Aggregate = Mongoose.model<IAggregateRoot>("aggregate_root", AggregateRootSchema);
+const Aggregate = Mongoose.model<IAggregateRootDbSchema>("aggregate_root", AggregateRootSchema);
 
-export { IAggregateRoot, AggregateRootSchema, Aggregate }
+export { AggregateRootSchema, Aggregate }

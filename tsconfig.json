@@ -9,7 +9,8 @@
             "mocha",
             "reflect-metadata"
         ],
-        "sourceMap": true,
+        "sourceMap": false,
+        "outDir": "compile_output",
         "module": "commonjs",
         "moduleResolution": "node",
         "experimentalDecorators": true,

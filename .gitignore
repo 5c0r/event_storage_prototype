@@ -1,1 +1,4 @@
 node_modules/
+compile_output/
+
+yarn.lock
