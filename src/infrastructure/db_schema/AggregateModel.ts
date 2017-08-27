@@ -1,5 +1,5 @@
-import * as Mongoose from "mongoose";
-import { IAggregateRootDbSchema } from "./../interface/IAggregate";
+import * as Mongoose from 'mongoose';
+import { IAggregateRootDbSchema } from './../interface/IAggregate';
 
 const ObjectId = Mongoose.Schema.Types.ObjectId;
 
@@ -9,6 +9,6 @@ const AggregateRootSchema = new Mongoose.Schema({
     LastModified: Date
 })
 
-const AggregateModel = Mongoose.model<IAggregateRootDbSchema>("aggregate_root", AggregateRootSchema);
+const AggregateModel = Mongoose.model<IAggregateRootDbSchema>('aggregate_root', AggregateRootSchema);
 
 export { AggregateRootSchema, AggregateModel }

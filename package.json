@@ -13,6 +13,7 @@
     "@types/mocha": "^2.2.42",
     "@types/reflect-metadata": "^0.0.5",
     "codelyzer": "^3.1.2",
+    "karma": "^1.7.0",
     "mocha": "^3.5.0",
     "tslint": "^5.7.0",
     "typescript": "^2.4.2"
