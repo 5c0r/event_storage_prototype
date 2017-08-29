@@ -55,9 +55,7 @@ class MyAggregate extends AggregateBase {
 
     constructor() {
         super();
-
-        this.RegisterEvent<ValueSet>(ValueSet.name, this.applyMyEvent);
-        this.RegisterEvent<NameSet>(NameSet.name, this.applyMyAnotherEvent);
+        this.WireUpEvents();
     }
 
     // Appliers
@@ -82,23 +80,28 @@ class MyAggregate extends AggregateBase {
 
         return this;
     }
+
+    public WireUpEvents(): void {
+        this.RegisterEvent<ValueSet>(ValueSet.name, this.applyMyEvent);
+        this.RegisterEvent<NameSet>(NameSet.name, this.applyMyAnotherEvent);
+    }
 }
 // End of sample
 
 @injectable()
 class MainProgram {
     private readonly mongooseInstance: IMongooseInstance = new BaseMongooseInstance(connString);
-    private readonly repository: IRepository<any, any> = new BaseRepository(this.mongooseInstance);
+    private readonly repository: IRepository<MyAggregate> = new BaseRepository(this.mongooseInstance, MyAggregate);
 
     constructor() {
         console.log('mongooseInstance', this.mongooseInstance);
         this.mongooseInstance.initialize();
     }
 
-    run() {
+    saveAggregate() {
         const newAggregate = new MyAggregate();
 
-        for (let i = 0; i < 1000; i++) {
+        for (let i = 0; i < 5; i++) {
             const random = () => Math.random() * i;
             newAggregate.setValue(random()).setString(`${random()} Name ${random()}`);
         }
@@ -106,14 +109,30 @@ class MainProgram {
         console.log('NewAggregate uncommitted events', newAggregate.UncommittedEvents);
         console.log('NewAggreagte testProperty = ', newAggregate.Name, newAggregate.TestProperty);
 
-        this.repository.StartStream(newAggregate);
+        this.repository.StartStream(newAggregate).subscribe(
+            res => {
+                console.log('save succes', res);
+                this.getAggregate(newAggregate._id);
+
+            },
+            err => console.log('StartStream err', err));
+    }
+
+    getAggregate(streamId: any) {
+        console.log('Getting stream =================');
+        this.repository.GetStream(streamId)
+            .subscribe(aggregate => console.log('Aggregate', aggregate))
+
+        console.log('Getting streamstate =================');
+        this.repository.GetStreamState(streamId)
+            .subscribe(streamState => console.log('StreamState', streamState))
     }
 
 }
 
 try {
     const program = new MainProgram();
-    program.run();
+    program.saveAggregate();
 } catch (err) {
     console.log('Exception', err);
     process.exit(0);

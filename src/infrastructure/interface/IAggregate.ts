@@ -1,6 +1,7 @@
 import * as Mongoose from 'mongoose';
 import { IEvent } from "./IEvent";
 
+// TODO: other field as ObjectId
 export interface IAggregateRoot {
     _id: any;
     Version: number;
@@ -12,10 +13,10 @@ export interface IAggregateRoot {
 export interface IAggreateStreamState {
     StreamId: any;
     CurrentVersion: Number;
-    LatestSnapshot: Number;
+    // LatestSnapshot: Number;
 }
 
-export class AggregateBase implements IAggregateRoot {
+export abstract class AggregateBase implements IAggregateRoot {
     _id: any;
     Version: number = 1;
     LastModified: Date;
@@ -33,13 +34,12 @@ export class AggregateBase implements IAggregateRoot {
         this.LastModified = lastModified;
     }
 
-    public RaiseEvent(ev: IEvent, isFetching: boolean = false) {
-        const className = ev.constructor.name;
+    public RaiseEvent(ev: IEvent, evType?: string, isFetching?: boolean) {
+        const className = evType || ev.constructor.name;
         if (!this._eventRouter[className]) {
-            console.log(`No route found for event ${className}`);
-            return;
+            throw new Error(`No event router found for ${className}`);
         }
-        this.InvokeEvent<typeof ev>(ev, isFetching);
+        this.InvokeEvent<typeof ev>(ev, evType, isFetching || false);
     }
 
     public RegisterEvent<T extends IEvent>(className: any, eventFunc: Function) {
@@ -51,16 +51,20 @@ export class AggregateBase implements IAggregateRoot {
         }
     }
 
+    abstract WireUpEvents(): void;
+
     public readonly UncommittedEvents = this._uncommittedEvents;
 
-    private InvokeEvent<T extends IEvent>(event: T, isFetching: boolean) {
-        console.log('Invoking event', event, isFetching);
-        this._eventRouter[event.constructor.name](event);
+    private InvokeEvent<T extends IEvent>(event: T, evType?: string, isFetching?: boolean) {
+        // console.log('Invoking event', event, typeof event, isFetching, this._eventRouter);
+        this._eventRouter[evType || event.constructor.name](event);
 
         if (!isFetching) this._uncommittedEvents.push(event);
 
         this.Version++;
     }
+
+
 }
 
 export type IAggregateRootDbSchema = Mongoose.Document & IAggregateRoot;

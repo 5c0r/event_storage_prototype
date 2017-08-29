@@ -1,6 +1,6 @@
 import { inject } from 'inversify';
-import { IAggregateRoot, IAggreateStreamState, IAggregateRootDbSchema } from './../../interface/IAggregate';
-import { IAggregateEvent, IAggregateEventDbSchema } from './../../interface/IEvent';
+import { IAggregateRoot, IAggreateStreamState, IAggregateRootDbSchema, AggregateBase } from './../../interface/IAggregate';
+import { IAggregateEvent, IAggregateEventDbSchema, IEvent } from './../../interface/IEvent';
 import { IMongooseInstance } from './../../interface/storage/IMongoInstance';
 import { AggregateModel } from './../../db_schema/AggregateModel';
 import { EventModel, } from "./../../db_schema/EventModel";
@@ -9,28 +9,29 @@ import * as Mongoose from 'mongoose';
 import { Observable as Observer } from 'rxjs';
 import { Observable } from 'rxjs/Observable';
 
-
 declare const emit: Function;
 
-export interface IRepository<T extends IAggregateRoot, T1 extends IAggregateEvent> {
+export interface IRepository<T extends AggregateBase> {
 
-    StartStream(aggregate: T, withEvents?: T1[]): Observable<any>;
+    StartStream(aggregate: T, withEvents?: IEvent[]): Observable<any>;
 
-    AppendStream(streamId: AAGUID, events: T1[], expectedVersion?: number): void;
+    AppendStream(streamId: AAGUID, events: IEvent[], expectedVersion?: number): void;
 
-    GetStream(streamId: AAGUID, version?: Number): T;
+    GetStream(streamId: AAGUID, version?: Number): Observable<T>;
     GetStreamState(streamId: AAGUID): Observable<IAggreateStreamState>;
 
-    GetEvents(streamId: AAGUID, version?: Number): T1[];
+    GetEvents(streamId: AAGUID, version?: Number): IEvent[];
 }
 
-export class BaseRepository implements IRepository<IAggregateRoot, any> {
+export class BaseRepository<T1 extends AggregateBase> implements IRepository<T1> {
 
-    constructor(private readonly mongoose: IMongooseInstance) {
+
+
+    constructor(private readonly mongoose: IMongooseInstance, private typeConstructor: { new(): T1 }) {
 
     }
 
-    StartStream(aggregate: IAggregateRoot, withEvents?: any[]): Observable<any> {
+    StartStream(aggregate: T1, withEvents?: any[]): Observable<any> {
         this.mongooseGuard();
 
         const toSave = aggregate.UncommittedEvents.map((ev, index) => {
@@ -58,20 +59,58 @@ export class BaseRepository implements IRepository<IAggregateRoot, any> {
         // Observable.fromP
     }
 
-    GetStream(streamId: string, version?: Number): IAggregateRoot {
-        throw new Error("Method not implemented.");
+    GetStream(streamId: string, version?: Number): Observable<T1> {
+
+        // TODO : Sort
+        let mrOptions: Mongoose.ModelMapReduceOption<IAggregateEventDbSchema, any, any> = {
+            map: function map() {
+                emit(this.StreamId, { Type: this.Type, Data: this.Data, Version: this.Version })
+            },
+            query: {
+                'StreamId': streamId
+            },
+            reduce: function reduce(key: any, values: any[]): any {
+                return { StreamId: key, Events: values };
+            }
+        }
+
+        return Observable.fromPromise(EventModel.mapReduce(mrOptions).then(res => {
+            if (res.length == 0) return null;
+
+            const aggregate = new this.typeConstructor();
+
+            res[0].value.Events.forEach((ev: any) => {
+                // console.log('perEvent', ev.Type, ev.Data);
+                aggregate.RaiseEvent(ev.Data, ev.Type, true);
+            });
+
+            return aggregate;
+        }))
     }
 
     GetStreamState(streamId: string): Observable<IAggreateStreamState> {
-        const searchQuery = {
-            StreamId: streamId
+
+        // TODO : Sort
+        let mrOptions: Mongoose.ModelMapReduceOption<IAggregateEventDbSchema, any, IAggreateStreamState> = {
+            map: function map() {
+                emit(this.StreamId, { Type: this.Type, Data: this.Data, Version: this.Version })
+            },
+            query: {
+                'StreamId': streamId
+            },
+            reduce: function reduce(key: any, values: any[]): IAggreateStreamState {
+                return {
+                    CurrentVersion: values.length,
+                    StreamId: key
+                };
+            }
         }
 
-        EventModel.find(searchQuery).sort({
-            Version: 1
-        });
+        return Observable.fromPromise(EventModel.mapReduce(mrOptions).then(res => {
+            if (res.length == 0) return null;
 
-        return null;
+            return res;
+        }))
     }
 
     GetEvents(streamId: string, version?: Number): any[] {
@@ -97,19 +136,9 @@ export class BaseRepository implements IRepository<IAggregateRoot, any> {
         console.error('onEntitySaveERR', err);
     }
 
-
-    private readonly mapFunc = (): void => {
-
-    }
-
-    private readonly reduceFunc = (key: any, value: any): void => {
-        console.log('reducerFunc', key, value);
-    }
-
     private readonly commandBuilder = (): any => {
         return {
             mapreduce: null
         }
     }
-
 }
