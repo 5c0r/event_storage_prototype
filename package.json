@@ -1,6 +1,6 @@
 {
   "name": "event_storage_prototype",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "license": "MIT",
   "dependencies": {
     "inversify": "^4.3.0",
@@ -12,11 +12,11 @@
     "@types/mongoose": "^4.7.21",
     "@types/mocha": "^2.2.42",
     "@types/reflect-metadata": "^0.0.5",
-    "codelyzer": "^3.1.2",
     "karma": "^1.7.0",
     "mocha": "^3.5.0",
     "tslint": "^5.7.0",
-    "typescript": "^2.4.2"
+    "typescript": "^2.4.2",
+    "rxjs": "^5.4.3"
   },
   "author": {
     "email": "nmt1994@gmail.com",

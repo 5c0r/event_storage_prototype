@@ -5,26 +5,30 @@ export interface IAggregateRoot {
     _id: any;
     Version: number;
     LastModified: Date;
+
+    UncommittedEvents: IEvent[];
 }
 
 export interface IAggreateStreamState {
-
+    StreamId: any;
+    CurrentVersion: Number;
+    LatestSnapshot: Number;
 }
 
 export class AggregateBase implements IAggregateRoot {
     _id: any;
-    Version: number;
+    Version: number = 1;
     LastModified: Date;
 
     private _eventRouter: { [type: string]: Function } = {};
     private _uncommittedEvents: IEvent[] = [];
 
     constructor() {
-
+        this.create(new Mongoose.Types.ObjectId(), 0, new Date());
     }
 
     create(id: any, version: number, lastModified: Date) {
-        this._id = id;
+        this._id = id || new Mongoose.Types.ObjectId();
         this.Version = version;
         this.LastModified = lastModified;
     }
@@ -54,6 +58,8 @@ export class AggregateBase implements IAggregateRoot {
         this._eventRouter[event.constructor.name](event);
 
         if (!isFetching) this._uncommittedEvents.push(event);
+
+        this.Version++;
     }
 }
 

@@ -15,12 +15,10 @@ import { EventBase } from './../src/infrastructure/interface/EventBase';
 import { IRepository, BaseRepository } from './../src/infrastructure/interface/storage/IRepository';
 import { BaseMongooseInstance, IMongooseInstance } from './../src/infrastructure/interface/storage/IMongoInstance';
 
-const connString = 'mongodb://localhost/event_storage';
-
+const connString = 'mongodb://localhost:27017/event_storage';
 
 const Injections = {
-    ConnectionString: connString,
-    MongooseInstance: new BaseMongooseInstance(null)
+    ConnectionString: connString
 }
 
 // Enum , Id generation strategy
@@ -30,13 +28,13 @@ enum IdentifierStrategy {
 }
 
 // Sample aggregate creation
-class MyEvent extends EventBase {
+class ValueSet extends EventBase {
     constructor(public Value: number) {
         super();
     }
 }
 
-class MyAnotherEvent extends EventBase {
+class NameSet extends EventBase {
     constructor(public anotherValue: string) {
         super();
     }
@@ -46,7 +44,6 @@ class MyAggregate extends AggregateBase {
 
     private testProperty: number;
     private anotherProperty: string;
-
 
     public get TestProperty(): number {
         return this.testProperty;
@@ -59,26 +56,29 @@ class MyAggregate extends AggregateBase {
     constructor() {
         super();
 
-        this.RegisterEvent<MyEvent>(MyEvent.name, this.applyMyEvent);
-        this.RegisterEvent<MyAnotherEvent>(MyAnotherEvent.name, this.applyMyAnotherEvent);
+        this.RegisterEvent<ValueSet>(ValueSet.name, this.applyMyEvent);
+        this.RegisterEvent<NameSet>(NameSet.name, this.applyMyAnotherEvent);
     }
 
-    private applyMyEvent = (ev: MyEvent): void => {
+    // Appliers
+    private applyMyEvent = (ev: ValueSet): void => {
         this.testProperty = ev.Value;
     }
 
-    private applyMyAnotherEvent = (ev: MyAnotherEvent): void => {
+    private applyMyAnotherEvent = (ev: NameSet): void => {
         this.anotherProperty = ev.anotherValue;
     }
+    // End of appliers
 
+    // Setters
     public setValue(newValue: number): this {
-        this.RaiseEvent(new MyEvent(newValue));
+        this.RaiseEvent(new ValueSet(newValue));
 
         return this;
     }
 
     public setString(newValue: string): this {
-        this.RaiseEvent(new MyAnotherEvent(newValue));
+        this.RaiseEvent(new NameSet(newValue));
 
         return this;
     }
@@ -92,63 +92,31 @@ class MainProgram {
 
     constructor() {
         console.log('mongooseInstance', this.mongooseInstance);
-        // this.mongooseInstance.initialize()
+        this.mongooseInstance.initialize();
     }
 
     run() {
         const newAggregate = new MyAggregate();
 
-        newAggregate.setValue(10).setString("Name");
+        for (let i = 0; i < 1000; i++) {
+            const random = () => Math.random() * i;
+            newAggregate.setValue(random()).setString(`${random()} Name ${random()}`);
+        }
 
         console.log('NewAggregate uncommitted events', newAggregate.UncommittedEvents);
         console.log('NewAggreagte testProperty = ', newAggregate.Name, newAggregate.TestProperty);
+
+        this.repository.StartStream(newAggregate);
     }
 
 }
 
-const program = new MainProgram();
-program.run();
+try {
+    const program = new MainProgram();
+    program.run();
+} catch (err) {
+    console.log('Exception', err);
+    process.exit(0);
+}
 
-// interface IStorageEngine {
-//     startStream<IAggregateRoot>(): any;
-// }
-
-// @injectable()
-// export class StorageEngine implements IStorageEngine {
-//     private readonly connectionInstance: Mongoose.Connection;
-
-//     constructor(connString: string) {
-//         Mongoose.connect(connString);
-
-//         this.connectionInstance = Mongoose.connection;
-
-//         this.connectionInstance.on('error', this.onConnectionError);
-//         this.connectionInstance.on('open', this.onConnectionOpened);
-
-//         console.log('MongoDB intance', this.connectionInstance);
-//     }
-
-//     startStream<IAggregateRoot>(): any {
-//         const newStreamData = new AggregateBase(new Mongoose.Types.ObjectId(), 0, new Date());
-//         const newStream = new AggregateModel(newStreamData);
-
-//         newStream.save({ safe: true, validateBeforeSave: true }, this.onEntitySave);
-//     }
-
-//     onEntitySave = (err: Error, item: any) => {
-//         if (err) return console.error('Error while saving entity', err);
-//         console.log('SAVED ENTITY', item);
-//         console.log('Exiting....');
-//         process.exit();
-//     }
-
-//     onConnectionError = (err: any): void => console.log('MongoDb connection err ', err);
-//     onConnectionOpened = (): void => {
-//         console.log('MongoDb Connected ');
-//     }
-// }
-
-// const engine = new StorageEngine(connString);
-
-// engine.startStream();
 

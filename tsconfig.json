@@ -7,7 +7,8 @@
         ],
         "types": [
             "mocha",
-            "reflect-metadata"
+            "reflect-metadata",
+            "mongoose"
         ],
         "sourceMap": false,
         "outDir": "compile_output",
@@ -17,5 +18,11 @@
         "emitDecoratorMetadata": true,
         "noImplicitAny": true,
         "removeComments": true
-    }
+    },
+    "exclude": [
+        "node_modules"
+    ],
+    "files": [
+        "samples/test_run.ts"
+    ]
 }
