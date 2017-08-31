@@ -19,17 +19,15 @@ export class MyAggregate extends AggregateBase {
     private testProperty: number;
     private anotherProperty: string;
 
-    public get TestProperty(): number {
-        return this.testProperty;
-    }
-
-    public get Name(): string {
-        return this.anotherProperty;
-    }
 
     constructor() {
         super();
         this.WireUpEvents();
+    }
+
+    public WireUpEvents(): void {
+        this.RegisterEvent<ValueSet>(ValueSet.name, this.applyMyEvent);
+        this.RegisterEvent<NameSet>(NameSet.name, this.applyMyAnotherEvent);
     }
 
     // Appliers
@@ -42,6 +40,15 @@ export class MyAggregate extends AggregateBase {
     }
     // End of appliers
 
+    // Getters
+
+    public get TestProperty(): number {
+        return this.testProperty;
+    }
+    public get Name(): string {
+        return this.anotherProperty;
+    }
+    
     // Setters
     public setValue(newValue: number): this {
         this.RaiseEvent(new ValueSet(newValue));
@@ -53,11 +60,6 @@ export class MyAggregate extends AggregateBase {
         this.RaiseEvent(new NameSet(newValue));
 
         return this;
-    }
-
-    public WireUpEvents(): void {
-        this.RegisterEvent<ValueSet>(ValueSet.name, this.applyMyEvent);
-        this.RegisterEvent<NameSet>(NameSet.name, this.applyMyAnotherEvent);
     }
 }
 // End of sample

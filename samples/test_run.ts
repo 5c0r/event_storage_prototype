@@ -36,7 +36,7 @@ class MainProgram {
     saveAggregate() {
         const newAggregate = new MyAggregate();
 
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 300; i++) {
             const random = () => Math.random() * i;
             newAggregate.setValue(random()).setString(`${random()} Name ${random()}`);
         }
@@ -54,13 +54,19 @@ class MainProgram {
     }
 
     getAggregate(streamId: any) {
-        console.log('Getting stream =================');
-        this.repository.GetStream(streamId)
-            .subscribe(aggregate => console.log('Aggregate', aggregate))
-
-        console.log('Getting streamstate =================');
         this.repository.GetStreamState(streamId)
             .subscribe(streamState => console.log('StreamState', streamState))
+
+        this.repository.GetStream(streamId, 400)
+            .subscribe(aggregate => console.log('Aggregate', aggregate))
+
+        // this.repository.GetEvents(streamId).subscribe(
+        //     events => console.log(events.length, 'Events', events)
+        // )
+    }
+
+    appendAggregate(streamId: any) {
+
     }
 
 }
@@ -69,7 +75,7 @@ try {
     const program = new MainProgram();
     program.saveAggregate();
 } catch (err) {
-    console.log('Exception', err);
+    console.log('Some Exception', err);
     process.exit(0);
 }
 

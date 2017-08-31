@@ -1,4 +1,3 @@
-// import { AggregateModel } from './../infrastructure/db_schema/AggregateModel';
 import { EventModel } from "./../infrastructure/db_schema/EventModel";
 import { AggregateBase } from './../infrastructure/interface/AggregateBase';
 import { IRepository } from './../infrastructure/interface/storage/IRepository';
@@ -19,9 +18,14 @@ export class BaseRepository<T1 extends AggregateBase> implements IRepository<T1>
     }
 
     StartStream(aggregate: T1, withEvents?: any[]): Observable<any> {
-        this.mongooseGuard();
-        const toSave = this.fromUncommittedEvents(aggregate);
-        return Observer.fromPromise(this.persistEvents(toSave));
+        try {
+            this.mongooseGuard();
+            const toSave = this.fromUncommittedEvents(aggregate);
+            return Observer.fromPromise(this.persistEvents(toSave));
+        } catch (error) {
+            return Observable.throw(error);
+        }
+
     }
 
     private fromUncommittedEvents(aggregate: T1): IAggregateEventDbSchema[] {
@@ -41,59 +45,91 @@ export class BaseRepository<T1 extends AggregateBase> implements IRepository<T1>
         return EventModel.insertMany(toSave);
     }
 
+    // TODO
     AppendStream(streamId: string, events: any[], expectedVersion?: number): void {
         // Get state -> state => AppendVersion
-
-
         const state: any = {};
+
+        let result = EventModel.count({ StreamId: streamId }).then(res => console.log('event count', res));
+
         const xpVersion: Number = expectedVersion || state.Version;
-        // Observable.fromP
     }
 
-    GetStream(streamId: string, version?: Number): Observable<T1> {
+    GetStream(streamId: string, version?: number): Observable<T1> {
 
-        // TODO : Sort
-        let mrOptions: Mongoose.ModelMapReduceOption<IAggregateEventDbSchema, any, any> = {
+        // TODO : Sort- Already sorted IIRC
+
+        let query: { [key: string]: any } = {
+            'StreamId': streamId,
+        }
+
+        if (version) {
+            query['Version'] = {
+                '$lt': version
+            }
+        }
+
+        let mrOptions: Mongoose.ModelMapReduceOption<IAggregateEventDbSchema, Mongoose.Types.ObjectId, any> = {
+            query: query,
             map: function map() {
-                emit(this.StreamId, { Type: this.Type, Data: this.Data, Version: this.Version })
+                emit(this.StreamId, { item: this })
             },
-            query: {
-                'StreamId': streamId
-            },
-            reduce: function reduce(key: any, values: any[]): any {
-                return { StreamId: key, Events: values };
+            reduce: function reduce(key, values) {
+                var ret = { item: [] };
+                var item = {};
+                values.forEach(function (value: any) {
+                    if (!item[value.item.StreamId]) {
+                        ret.item.push(value.item);
+                        item[value.StreamId] = true;
+                    }
+                })
+                return ret;
             }
         }
 
         return Observable.fromPromise(EventModel.mapReduce(mrOptions).then(res => {
             if (res.length == 0) return null;
 
+            //https://stackoverflow.com/questions/28149213/mongodb-mapreduce-method-unexpected-results#28161632
+            console.log('res', res);
+            console.log('resevets', res[0].value);
             const aggregate = new this.typeConstructor();
+            res[0].value.values.forEach((item: any) => {
+                if (item.values) {
+                    item.values.forEach((ev: any) => {
+                        console.log('perItem', ev);
+                        aggregate.RaiseEvent(ev.Data, ev.Type, true);
+                    })
+                } else {
+                    let ev = item;
+                    console.log('perEv', ev);
+                    aggregate.RaiseEvent(ev.Data, ev.Type, true);
+                }
 
-            res[0].value.Events.forEach((ev: any) => {
-                // console.log('perEvent', ev.Type, ev.Data);
-                aggregate.RaiseEvent(ev.Data, ev.Type, true);
             });
 
             return aggregate;
         }))
+
+        // 1st approach , WORKING
+        // return this.GetEvents(streamId, version).map((res: IAggregateEventDbSchema[]) => {
+        //     const aggregate = new this.typeConstructor();
+
+        //     res.forEach(event => aggregate.RaiseEvent(event.Data, event.Type, true))
+
+        //     return aggregate;
+        // })
     }
 
-    GetStreamV1(streamId: string, version?: Number): Observable<T1> {
-        return Observable.of(null);
-    }
-
+    // What we call 'Aggregators'
     private buildAggregateFromEvents(events: IEvent[]): T1 {
         const aggregate = new this.typeConstructor();
-
         events.forEach((ev: any): void => aggregate.RaiseEvent(ev.Data, ev.Type, true));
 
         return aggregate;
     }
 
     GetStreamState(streamId: string): Observable<IAggreateStreamState> {
-
-        // TODO : Sort
         let mrOptions: Mongoose.ModelMapReduceOption<IAggregateEventDbSchema, any, IAggreateStreamState> = {
             map: function map() {
                 emit(this.StreamId, { Type: this.Type, Data: this.Data, Version: this.Version })
@@ -109,39 +145,24 @@ export class BaseRepository<T1 extends AggregateBase> implements IRepository<T1>
             }
         }
 
-        return Observable.fromPromise(EventModel.mapReduce(mrOptions).then(res => {
-            if (res.length == 0) return null;
+        try {
+            return Observable.fromPromise(EventModel.mapReduce(mrOptions));
+        } catch (err) {
+            return Observable.throw(err);
+        }
 
-            return res;
-        }))
+
     }
 
-    GetEvents(streamId: string, version?: Number): any[] {
-        throw new Error("Method not implemented.");
-    }
+    GetEvents(streamId: string, version?: number): Observable<IEvent[]> {
+        let query = EventModel.find({ StreamId: streamId });
 
-    private buildAggregateFromStream(streamId: string, version?: Number): void {
-        // Get stream state
-        // Get events from stream
-        // Build
+        query = version ? query.where('Version').lte(version) : query;
+
+        return Observer.fromPromise(query.sort({ Version: 1 }).then(res => res));
     }
 
     private mongooseGuard(): void {
         if (!this.mongoose) throw new Error('No mongoose instance instantiated !');
-    }
-
-
-    private readonly onEntitySave = (item: any): void => {
-        console.log('Saved entity', item.length || item);
-    }
-
-    private readonly onEntitySaveErr = (err: Error): void => {
-        console.error('onEntitySaveERR', err);
-    }
-
-    private readonly commandBuilder = (): any => {
-        return {
-            mapreduce: null
-        }
     }
 }

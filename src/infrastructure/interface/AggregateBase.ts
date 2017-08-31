@@ -24,6 +24,7 @@ export abstract class AggregateBase implements IAggregateRoot {
     }
 
     public RaiseEvent(ev: IEvent, evType?: string, isFetching?: boolean) {
+        console.log('Raising Events', ev, evType);
         const className = evType || ev.constructor.name;
         if (!this._eventRouter[className]) {
             throw new Error(`No event router found for ${className}`);

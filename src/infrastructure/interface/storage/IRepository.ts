@@ -15,5 +15,5 @@ export interface IRepository<T extends IAggregateRoot> {
     GetStream(streamId: AAGUID, version?: Number): Observable<T>;
     GetStreamState(streamId: AAGUID): Observable<IAggreateStreamState>;
 
-    GetEvents(streamId: AAGUID, version?: Number): IEvent[];
+    GetEvents(streamId: AAGUID, version?: Number): Observable<IEvent[]>;
 }
