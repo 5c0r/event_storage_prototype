@@ -2,6 +2,7 @@ import * as Mongoose from 'mongoose';
 import { IAggregateEventDbSchema } from './../interface/IEvent';
 
 const EventSchema = new Mongoose.Schema({
+    ActionId: { type: Number, required: true },
     StreamId: { type: String, required: true, index: true },
     Data: { type: Object, required: true },
     Type: { type: String, required: true },

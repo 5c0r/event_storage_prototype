@@ -4,6 +4,7 @@ export interface IEvent {
 }
 
 export interface IAggregateEvent {
+    ActionId: any;
     StreamId: AAGUID;
     Data: IEvent;
     Type: string;

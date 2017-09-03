@@ -14,17 +14,18 @@ export abstract class AggregateBase implements IAggregateRoot {
     private _committedEvents: IEvent[] = [];
 
     constructor() {
-        this.create(new Mongoose.Types.ObjectId(), 0, new Date());
+
     }
 
-    create(id: any, version: number, lastModified: Date) {
+    public create(id: any, version?: number, lastModified?: Date) {
         this._id = id || new Mongoose.Types.ObjectId();
-        this.Version = version;
+        this.Version = version || 1;
+        // Not worked
         this.LastModified = lastModified;
     }
 
     public RaiseEvent(ev: IEvent, evType?: string, isFetching?: boolean) {
-        console.log('Raising Events', ev, evType);
+        // console.log('Raising Events', ev, evType);
         const className = evType || ev.constructor.name;
         if (!this._eventRouter[className]) {
             throw new Error(`No event router found for ${className}`);
@@ -54,5 +55,6 @@ export abstract class AggregateBase implements IAggregateRoot {
         else this._committedEvents.push(event);
 
         this.Version++;
+        // this.LastModified = event.
     }
 }

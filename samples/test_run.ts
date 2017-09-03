@@ -24,7 +24,7 @@ enum IdentifierStrategy {
 }
 
 @injectable()
-class MainProgram {
+export class MainProgram {
     private readonly mongooseInstance: IMongooseInstance = new BaseMongooseInstance(connString);
     private readonly repository: IRepository<MyAggregate> = new BaseRepository(this.mongooseInstance, MyAggregate);
 
@@ -36,28 +36,22 @@ class MainProgram {
     saveAggregate() {
         const newAggregate = new MyAggregate();
 
-        for (let i = 0; i < 300; i++) {
+        for (let i = 0; i < 5; i++) {
             const random = () => Math.random() * i;
             newAggregate.setValue(random()).setString(`${random()} Name ${random()}`);
         }
 
-        console.log('NewAggregate uncommitted events', newAggregate.UncommittedEvents);
-        console.log('NewAggreagte testProperty = ', newAggregate.Name, newAggregate.TestProperty);
+        // console.log('NewAggregate uncommitted events', newAggregate.UncommittedEvents);
+        // console.log('NewAggreagte testProperty = ', newAggregate.Name, newAggregate.TestProperty);
 
-        this.repository.StartStream(newAggregate).subscribe(
-            res => {
-                console.log('save succes', res);
-                this.getAggregate(newAggregate._id);
-
-            },
-            err => console.log('StartStream err', err));
+        this.repository.StartStream(newAggregate);
     }
 
     getAggregate(streamId: any) {
         this.repository.GetStreamState(streamId)
             .subscribe(streamState => console.log('StreamState', streamState))
 
-        this.repository.GetStream(streamId, 400)
+        this.repository.GetStream(streamId)
             .subscribe(aggregate => console.log('Aggregate', aggregate))
 
         // this.repository.GetEvents(streamId).subscribe(
@@ -66,14 +60,26 @@ class MainProgram {
     }
 
     appendAggregate(streamId: any) {
+        console.log('getting stream to append streamId', streamId);
+        let stream$ = this.repository.GetStream(streamId).subscribe((res) => {
+            res.setString('Hello guys');
+            res.setValue(10);
 
+            this.repository.SaveStream(res);
+        })
     }
 
 }
 
 try {
     const program = new MainProgram();
-    program.saveAggregate();
+
+    // program.saveAggregate();
+
+    // program.appendAggregate('59ac2378a489782c3c260a45');
+
+    program.getAggregate('59ac2378a489782c3c260a45');
+
 } catch (err) {
     console.log('Some Exception', err);
     process.exit(0);
