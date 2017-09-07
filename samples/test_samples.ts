@@ -2,7 +2,7 @@ import { AggregateBase } from './../src/infrastructure/interface/AggregateBase';
 import { EventBase } from './../src/infrastructure/interface/EventBase';
 
 // Sample aggregate creation
-export class ValueSet extends EventBase {
+export class AccountDeposited extends EventBase {
     constructor(public Value: number) {
         super();
     }
@@ -14,11 +14,11 @@ export class NameSet extends EventBase {
     }
 }
 
-export class MyAggregate extends AggregateBase {
+// Stream of Events 
+export class BankAccount extends AggregateBase {
 
-    private testProperty: number;
-    private anotherProperty: string;
-
+    private balance: number = 0;
+    private accountHolder: string = '';
 
     constructor() {
         super();
@@ -26,40 +26,39 @@ export class MyAggregate extends AggregateBase {
     }
 
     public WireUpEvents(): void {
-        this.RegisterEvent<ValueSet>(ValueSet.name, this.applyMyEvent);
+        this.RegisterEvent<AccountDeposited>(AccountDeposited.name, this.applyMyEvent);
         this.RegisterEvent<NameSet>(NameSet.name, this.applyMyAnotherEvent);
     }
 
-    // Appliers
-    private applyMyEvent = (ev: ValueSet): void => {
-        this.testProperty = ev.Value;
-    }
-
-    private applyMyAnotherEvent = (ev: NameSet): void => {
-        this.anotherProperty = ev.anotherValue;
-    }
-    // End of appliers
-
     // Getters
-
     public get TestProperty(): number {
-        return this.testProperty;
+        return this.balance;
     }
     public get Name(): string {
-        return this.anotherProperty;
+        return this.accountHolder;
     }
     
     // Setters
-    public setValue(newValue: number): this {
-        this.RaiseEvent(new ValueSet(newValue));
-
+    public deposit(newValue: number): this {
+        this.RaiseEvent(new AccountDeposited(newValue));
         return this;
     }
 
-    public setString(newValue: string): this {
+    public setName(newValue: string): this {
         this.RaiseEvent(new NameSet(newValue));
-
         return this;
     }
+    // End of setters
+
+    // Appliers
+    private applyMyEvent = (ev: AccountDeposited): void => {
+        this.balance = this.balance + ev.Value;
+    }
+
+    private applyMyAnotherEvent = (ev: NameSet): void => {
+        this.accountHolder = ev.anotherValue;
+    }
+    // End of appliers
+
 }
 // End of sample

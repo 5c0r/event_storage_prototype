@@ -5,7 +5,7 @@ import 'reflect-metadata';
 import * as Mongoose from 'mongoose';
 import { injectable, inject } from 'inversify';
 
-import { MyAggregate } from './test_samples';
+import { BankAccount } from './test_samples';
 
 import { IRepository } from './../src/infrastructure/interface/storage/IRepository';
 import { BaseRepository } from './../src/engine/BaseRepository';
@@ -26,7 +26,7 @@ enum IdentifierStrategy {
 @injectable()
 export class MainProgram {
     private readonly mongooseInstance: IMongooseInstance = new BaseMongooseInstance(connString);
-    private readonly repository: IRepository<MyAggregate> = new BaseRepository(this.mongooseInstance, MyAggregate);
+    private readonly repository: IRepository<BankAccount> = new BaseRepository(this.mongooseInstance, BankAccount);
 
     constructor() {
         console.log('mongooseInstance', this.mongooseInstance);
@@ -34,11 +34,11 @@ export class MainProgram {
     }
 
     saveAggregate() {
-        const newAggregate = new MyAggregate();
+        const newAggregate = new BankAccount();
 
         for (let i = 0; i < 5; i++) {
             const random = () => Math.random() * i;
-            newAggregate.setValue(random()).setString(`${random()} Name ${random()}`);
+            newAggregate.deposit(random()).setName(`${random()} Name ${random()}`);
         }
 
         // console.log('NewAggregate uncommitted events', newAggregate.UncommittedEvents);
@@ -59,11 +59,16 @@ export class MainProgram {
         // )
     }
 
+    getAggregateWithMapReduce(streamId: any) {
+        this.repository.GetStreamWithMapReduce(streamId)
+            .subscribe(stream => console.log('GetStreamWIthMapReduce', stream));
+    }
+
     appendAggregate(streamId: any) {
         console.log('getting stream to append streamId', streamId);
         let stream$ = this.repository.GetStream(streamId).subscribe((res) => {
-            res.setString('Hello guys');
-            res.setValue(10);
+            res.setName('Hello guys');
+            res.deposit(10);
 
             this.repository.SaveStream(res);
         })
@@ -76,9 +81,9 @@ try {
 
     // program.saveAggregate();
 
-    // program.appendAggregate('59ac2378a489782c3c260a45');
+    // program.appendAggregate('59b12a662c09642b64fb541c');
 
-    program.getAggregate('59ac2378a489782c3c260a45');
+    program.getAggregate('59b12a662c09642b64fb541c');
 
 } catch (err) {
     console.log('Some Exception', err);

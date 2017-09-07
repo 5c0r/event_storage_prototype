@@ -132,7 +132,7 @@ export class BaseRepository<T1 extends AggregateBase> implements IRepository<T1>
 
     GetEvents(streamId: string, version?: number): Observable<IEvent[]> {
         let query = EventModel.find({ StreamId: streamId });
-        console.log('getting events for stream', streamId);
+
         query = version ? query.where('Version').lte(version) : query;
 
         return Observer.fromPromise(query.sort({ Version: 1 }).then(res => {
@@ -147,7 +147,7 @@ export class BaseRepository<T1 extends AggregateBase> implements IRepository<T1>
         if (!this.mongoose) throw new Error('No mongoose instance instantiated !');
     }
 
-    public FailedGetStream(streamId: any, version: number): Observable<T1> {
+    public GetStreamWithMapReduce(streamId: any, version?: number): Observable<T1> {
         let query: { [key: string]: any } = {
             'StreamId': streamId,
         }
