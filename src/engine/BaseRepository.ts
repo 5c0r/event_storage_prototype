@@ -161,15 +161,16 @@ export class BaseRepository<T1 extends AggregateBase> implements IRepository<T1>
         let mrOptions: Mongoose.ModelMapReduceOption<IAggregateEventDbSchema, Mongoose.Types.ObjectId, any> = {
             query: query,
             map: function map() {
-                emit(this.StreamId, { item: this })
+                emit(this._id, { item: this })
             },
             reduce: function reduce(key, values) {
                 var ret = { item: [] };
                 var item = {};
+
                 values.forEach(function (value: any) {
-                    if (!item[value.item.StreamId]) {
+                    if (!item[value.item._id]) {
                         ret.item.push(value.item);
-                        item[value.StreamId] = true;
+                        item[value._id] = true;
                     }
                 })
                 return ret;
@@ -181,20 +182,10 @@ export class BaseRepository<T1 extends AggregateBase> implements IRepository<T1>
 
             //https://stackoverflow.com/questions/28149213/mongodb-mapreduce-method-unexpected-results#28161632
             console.log('res', res);
-            console.log('resevets', res[0].value);
-            const aggregate = new this.typeConstructor();
-            res[0].value.values.forEach((item: any) => {
-                if (item.values) {
-                    item.values.forEach((ev: any) => {
-                        console.log('perItem', ev);
-                        aggregate.RaiseEvent(ev.Data, ev.Type, true);
-                    })
-                } else {
-                    let ev = item;
-                    console.log('perEv', ev);
-                    aggregate.RaiseEvent(ev.Data, ev.Type, true);
-                }
 
+            const aggregate = new this.typeConstructor();
+            res.map((item: any): IEvent => item.value.item).forEach((ev: any) => {
+                aggregate.RaiseEvent(ev.Data, ev.Type, true);
             });
 
             return aggregate;

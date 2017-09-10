@@ -26,7 +26,7 @@ enum IdentifierStrategy {
 @injectable()
 export class MainProgram {
     private readonly mongooseInstance: IMongooseInstance = new BaseMongooseInstance(connString);
-    private readonly repository: IRepository<BankAccount> = new BaseRepository(this.mongooseInstance, BankAccount);
+    private readonly repository: BaseRepository<BankAccount> = new BaseRepository(this.mongooseInstance, BankAccount);
 
     constructor() {
         console.log('mongooseInstance', this.mongooseInstance);
@@ -36,13 +36,10 @@ export class MainProgram {
     saveAggregate() {
         const newAggregate = new BankAccount();
 
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 10000; i++) {
             const random = () => Math.random() * i;
-            newAggregate.deposit(random()).setName(`${random()} Name ${random()}`);
+            newAggregate.deposit(random()).setName(`Name ${random()}`);
         }
-
-        // console.log('NewAggregate uncommitted events', newAggregate.UncommittedEvents);
-        // console.log('NewAggreagte testProperty = ', newAggregate.Name, newAggregate.TestProperty);
 
         this.repository.StartStream(newAggregate);
     }
@@ -53,10 +50,6 @@ export class MainProgram {
 
         this.repository.GetStream(streamId)
             .subscribe(aggregate => console.log('Aggregate', aggregate))
-
-        // this.repository.GetEvents(streamId).subscribe(
-        //     events => console.log(events.length, 'Events', events)
-        // )
     }
 
     getAggregateWithMapReduce(streamId: any) {
@@ -81,9 +74,11 @@ try {
 
     // program.saveAggregate();
 
-    // program.appendAggregate('59b12a662c09642b64fb541c');
+    program.getAggregateWithMapReduce('59b58e5773e13d3584bf6d40');
 
-    program.getAggregate('59b12a662c09642b64fb541c');
+    // program.appendAggregate('59b58c8862b75d3db4695cbe');
+
+    // program.getAggregate('59b12a662c09642b64fb541c');
 
 } catch (err) {
     console.log('Some Exception', err);
