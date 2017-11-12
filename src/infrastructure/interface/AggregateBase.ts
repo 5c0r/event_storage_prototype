@@ -1,14 +1,18 @@
 import * as Mongoose from 'mongoose';
-import { IEvent } from "./IEvent";
+import { IEvent, IApplyEvent } from "./IEvent";
 
 import { IAggregateRoot } from './IAggregate';
+
+export interface EventRouter {
+    [type: string]: IApplyEvent<IEvent>;
+}
 
 export abstract class AggregateBase implements IAggregateRoot {
     _id: any;
     Version: number = 1;
     LastModified: Date;
 
-    private _eventRouter: { [type: string]: Function } = {};
+    private _eventRouter: EventRouter = {};
 
     private _uncommittedEvents: IEvent[] = [];
     private _committedEvents: IEvent[] = [];
@@ -25,15 +29,16 @@ export abstract class AggregateBase implements IAggregateRoot {
     }
 
     public RaiseEvent(ev: IEvent, evType?: string, isFetching?: boolean) {
-        console.log('Raising Events', ev, evType);
+        // console.log('Raising Events', ev, evType);
         const className = evType || ev.constructor.name;
         if (!this._eventRouter[className]) {
             throw new Error(`No event router found for ${className}`);
         }
-        this.InvokeEvent<typeof ev>(ev, evType, isFetching || false);
+        this.InvokeEvent(ev, evType, isFetching || false);
     }
 
-    public RegisterEvent<T extends IEvent>(className: any, eventFunc: Function) {
+    public RegisterEvent<T extends IEvent>(className: any, eventFunc: IApplyEvent<T>) {
+        if (!eventFunc) throw new Error(`Event applier for ${className} is undefined !`);
 
         if (!this._eventRouter[className.name]) {
             this._eventRouter[className] = eventFunc;
@@ -42,13 +47,10 @@ export abstract class AggregateBase implements IAggregateRoot {
         }
     }
 
-    abstract WireUpEvents(): void;
-
     public readonly UncommittedEvents = this._uncommittedEvents;
     public readonly CommittedEvents = this._committedEvents;
 
-    private InvokeEvent<T extends IEvent>(event: T, evType?: string, isFetching?: boolean) {
-        // console.log('Invoking event', event, typeof event, isFetching, this._eventRouter);
+    private InvokeEvent(event: IEvent, evType?: string, isFetching?: boolean) {
         this._eventRouter[evType || event.constructor.name](event);
 
         if (!isFetching) this._uncommittedEvents.push(event);
@@ -58,3 +60,4 @@ export abstract class AggregateBase implements IAggregateRoot {
         // this.LastModified = event.
     }
 }
+

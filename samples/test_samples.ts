@@ -1,8 +1,17 @@
-import { AggregateBase } from './../src/infrastructure/interface/AggregateBase';
+import { AggregateBase, EventRouter } from './../src/infrastructure/interface/AggregateBase';
 import { EventBase } from './../src/infrastructure/interface/EventBase';
+
+import { IApplyEvent } from './../src/infrastructure/interface/IEvent';
+
 
 // Sample aggregate creation
 export class AccountDeposited extends EventBase {
+    constructor(public Value: number) {
+        super();
+    }
+}
+
+export class AccountWithdrawed extends EventBase {
     constructor(public Value: number) {
         super();
     }
@@ -26,21 +35,31 @@ export class BankAccount extends AggregateBase {
     }
 
     public WireUpEvents(): void {
-        this.RegisterEvent<AccountDeposited>(AccountDeposited.name, this.applyMyEvent);
-        this.RegisterEvent<NameSet>(NameSet.name, this.applyMyAnotherEvent);
+        this.RegisterEvent<AccountDeposited>(AccountDeposited.name, this.accountDeposited);
+        this.RegisterEvent<NameSet>(NameSet.name, this.accountHolderSet);
+        this.RegisterEvent<AccountWithdrawed>(AccountWithdrawed.name, this.accountWithdrawed)
     }
 
     // Getters
-    public get TestProperty(): number {
+    public get CurrentBalance(): number {
         return this.balance;
     }
-    public get Name(): string {
+    public get AccountHolderName(): string {
         return this.accountHolder;
     }
-    
+
     // Setters
     public deposit(newValue: number): this {
         this.RaiseEvent(new AccountDeposited(newValue));
+        return this;
+    }
+
+    public withdraw(newValue: number, threshold: number = 0): this {
+        if (newValue < 0) throw new Error(`Invalid amount ${newValue} given for withdraw action`);
+        else if (newValue - threshold > this.balance) throw new Error(`It is not possible to withdraw more than ${newValue} `);
+
+        this.RaiseEvent(new AccountWithdrawed(newValue));
+
         return this;
     }
 
@@ -51,14 +70,16 @@ export class BankAccount extends AggregateBase {
     // End of setters
 
     // Appliers
-    private applyMyEvent = (ev: AccountDeposited): void => {
+    public accountDeposited = (ev: AccountDeposited): void => {
         this.balance = this.balance + ev.Value;
     }
 
-    private applyMyAnotherEvent = (ev: NameSet): void => {
+    public accountHolderSet = (ev: NameSet): void => {
         this.accountHolder = ev.anotherValue;
     }
-    // End of appliers
 
+    public accountWithdrawed = (ev: AccountWithdrawed): void => {
+        this.balance = this.balance - ev.Value;
+    }
+    // End of appliers
 }
-// End of sample

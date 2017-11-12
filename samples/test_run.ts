@@ -8,10 +8,10 @@ import { injectable, inject } from 'inversify';
 import { BankAccount } from './test_samples';
 
 import { IRepository } from './../src/infrastructure/interface/storage/IRepository';
-import { BaseRepository } from './../src/engine/BaseRepository';
+import { EventStorage } from './../src/engine/BaseRepository';
 import { BaseMongooseInstance, IMongooseInstance } from './../src/infrastructure/interface/storage/IMongoInstance';
 
-const connString = 'mongodb://localhost:27017/event_storage';
+const connString = 'mongodb://192.168.1.144:27017/event_storage';
 
 const Injections = {
     ConnectionString: connString
@@ -26,7 +26,7 @@ enum IdentifierStrategy {
 @injectable()
 export class MainProgram {
     private readonly mongooseInstance: IMongooseInstance = new BaseMongooseInstance(connString);
-    private readonly repository: BaseRepository<BankAccount> = new BaseRepository(this.mongooseInstance, BankAccount);
+    private readonly repository: EventStorage<BankAccount> = new EventStorage(this.mongooseInstance, BankAccount);
 
     constructor() {
         console.log('mongooseInstance', this.mongooseInstance);
@@ -36,7 +36,7 @@ export class MainProgram {
     saveAggregate() {
         const newAggregate = new BankAccount();
 
-        for (let i = 0; i < 10000; i++) {
+        for (let i = 0; i < 10; i++) {
             const random = () => Math.random() * i;
             newAggregate.deposit(random()).setName(`Name ${random()}`);
         }
@@ -59,7 +59,7 @@ export class MainProgram {
 
     appendAggregate(streamId: any) {
         console.log('getting stream to append streamId', streamId);
-        let stream$ = this.repository.GetStream(streamId).subscribe((res) => {
+        const stream$ = this.repository.GetStream(streamId).subscribe((res) => {
             res.setName('Hello guys');
             res.deposit(10);
 
@@ -74,7 +74,7 @@ try {
 
     // program.saveAggregate();
 
-    program.getAggregateWithMapReduce('59b58e5773e13d3584bf6d40');
+    program.getAggregateWithMapReduce('5a089b86fe1985453cece451');
 
     // program.appendAggregate('59b58c8862b75d3db4695cbe');
 

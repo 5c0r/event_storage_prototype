@@ -14,8 +14,17 @@ import { Observable } from 'rxjs/Observable';
 
 declare const emit: Function;
 
-export class BaseRepository<T1 extends AggregateBase> implements IRepository<T1> {
+export class EventStorage<T1 extends AggregateBase> implements IRepository<T1> {
+
     constructor(private readonly mongoose: IMongooseInstance, private typeConstructor: { new(): T1 }) {
+
+    }
+
+    public startMongo(connString: string): void {
+
+    }
+
+    public startMongoUsingInstance(mongoInstance: IMongooseInstance) {
 
     }
 
@@ -56,7 +65,7 @@ export class BaseRepository<T1 extends AggregateBase> implements IRepository<T1>
         try {
 
             const actionId = Math.random();
-            let streamState$ = newStream ? Observable.of(new StreamStateBase()) : this.GetStreamState(streamId).map((state: any) => {
+            const streamState$ = newStream ? Observable.of(new StreamStateBase()) : this.GetStreamState(streamId).map((state: any) => {
                 const innerExpectedVersion: number = version || (state.CurrentVersion + events.length);
                 const outerExpectedVersion: number = state.CurrentVersion + events.length;
 
@@ -144,7 +153,8 @@ export class BaseRepository<T1 extends AggregateBase> implements IRepository<T1>
     }
 
     private mongooseGuard(): void {
-        if (!this.mongoose) throw new Error('No mongoose instance instantiated !');
+        if (!this.mongoose || this.mongoose == null) 
+            throw new Error('No mongoose instance instantiated !');
     }
 
     public GetStreamWithMapReduce(streamId: any, version?: number): Observable<T1> {
@@ -158,7 +168,7 @@ export class BaseRepository<T1 extends AggregateBase> implements IRepository<T1>
             }
         }
 
-        let mrOptions: Mongoose.ModelMapReduceOption<IAggregateEventDbSchema, Mongoose.Types.ObjectId, any> = {
+        const mrOptions: Mongoose.ModelMapReduceOption<IAggregateEventDbSchema, Mongoose.Types.ObjectId, any> = {
             query: query,
             map: function map() {
                 emit(this._id, { item: this })
@@ -181,8 +191,6 @@ export class BaseRepository<T1 extends AggregateBase> implements IRepository<T1>
             if (res.length == 0) return null;
 
             //https://stackoverflow.com/questions/28149213/mongodb-mapreduce-method-unexpected-results#28161632
-            console.log('res', res);
-
             const aggregate = new this.typeConstructor();
             res.map((item: any): IEvent => item.value.item).forEach((ev: any) => {
                 aggregate.RaiseEvent(ev.Data, ev.Type, true);
