@@ -1,3 +1,4 @@
-import { AggregateModel } from './infrastructure/db_schema/AggregateModel';
+import { EventStorage } from './engine/baseRepository';
 
-// console.log('Hello-world', AggregateModel);
+
+export { EventStorage };

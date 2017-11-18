@@ -1,6 +1,6 @@
-import { IAggreateStreamState } from './IAggregate';
+import { AggreateStreamState } from './aggregate';
 
-export class StreamStateBase implements IAggreateStreamState {
+export class StreamStateBase implements AggreateStreamState {
     StreamId: any;
     CurrentVersion: number;
 

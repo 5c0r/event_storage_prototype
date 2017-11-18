@@ -6,6 +6,7 @@
   "dependencies": {
     "bluebird": "^3.5.0",
     "body-parser": "^1.17.2",
+    "immutable": "^3.8.2",
     "express": "^4.15.4",
     "inversify": "^4.3.0",
     "mongoose": "^4.13.1",
@@ -13,13 +14,13 @@
   },
   "devDependencies": {
     "@types/express": "^4.0.37",
-    "@types/mocha": "^2.2.42",
     "@types/mongodb": "^2.2.15",
     "@types/mongoose": "^4.7.26",
+    "@types/jest": "^21.1.6",
     "@types/reflect-metadata": "^0.0.5",
-    "codelyzer": "^4.0.1",
-    "karma": "^1.7.0",
-    "mocha": "^3.5.0",
+    "jest": "^21.2.1",
+    "ts-jest": "^21.2.3",
+    "istanbul": "^0.4.5",
     "rxjs": "^5.4.3",
     "ts-node": "^3.3.0",
     "tslint": "^5.8.0",
@@ -31,7 +32,26 @@
   },
   "scripts": {
     "tsc": "npm run tsc",
+    "test": "jest --coverage",
     "compileSample": "tsc -p tsconfig.json",
     "runSample": "node compile_output/samples/test_run.js"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.tsx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    },
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json"
+    ],
+    "coverageDirectory": "<rootDir>",
+    "coverageReporters": [
+      "json",
+      "text-summary"
+    ]
   }
 }

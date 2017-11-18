@@ -1,7 +1,7 @@
-import { AggregateBase, EventRouter } from './../src/infrastructure/interface/AggregateBase';
-import { EventBase } from './../src/infrastructure/interface/EventBase';
+import { AggregateBase, SimpleRouter } from './../src/infrastructure/interface/aggregateBase';
+import { EventBase } from './../src/infrastructure/interface/eventBase';
 
-import { IApplyEvent } from './../src/infrastructure/interface/IEvent';
+import { ApplyEvent } from './../src/infrastructure/interface/event';
 
 
 // Sample aggregate creation
@@ -35,9 +35,9 @@ export class BankAccount extends AggregateBase {
     }
 
     public WireUpEvents(): void {
-        this.RegisterEvent<AccountDeposited>(AccountDeposited.name, this.accountDeposited);
-        this.RegisterEvent<NameSet>(NameSet.name, this.accountHolderSet);
-        this.RegisterEvent<AccountWithdrawed>(AccountWithdrawed.name, this.accountWithdrawed)
+        this.RegisterEvent(AccountDeposited, this.accountDeposited);
+        this.RegisterEvent(NameSet, this.accountHolderSet);
+        this.RegisterEvent(AccountWithdrawed, this.accountWithdrawed)
     }
 
     // Getters

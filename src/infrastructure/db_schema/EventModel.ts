@@ -1,5 +1,5 @@
 import * as Mongoose from 'mongoose';
-import { IAggregateEventDbSchema } from './../interface/IEvent';
+import { AggregateEventDbSchema } from './../interface/event';
 
 const EventSchema = new Mongoose.Schema({
     ActionId: { type: Number, required: true },
@@ -10,6 +10,6 @@ const EventSchema = new Mongoose.Schema({
     Version: { type: Number, required: true }
 })
 
-const EventModel = Mongoose.model<IAggregateEventDbSchema>('aggregate_events', EventSchema);
+const EventModel = Mongoose.model<AggregateEventDbSchema>('aggregate_events', EventSchema);
 
 export { EventSchema, EventModel }

@@ -7,9 +7,9 @@ import { injectable, inject } from 'inversify';
 
 import { BankAccount } from './test_samples';
 
-import { IRepository } from './../src/infrastructure/interface/storage/IRepository';
+import { Repository } from './../src/infrastructure/interface/storage/repository';
 import { EventStorage } from './../src/engine/BaseRepository';
-import { BaseMongooseInstance, IMongooseInstance } from './../src/infrastructure/interface/storage/IMongoInstance';
+import { BaseMongooseInstance, MongooseInstance } from './../src/infrastructure/interface/storage/mongoInstance';
 
 const connString = 'mongodb://192.168.1.144:27017/event_storage';
 
@@ -25,7 +25,7 @@ enum IdentifierStrategy {
 
 @injectable()
 export class MainProgram {
-    private readonly mongooseInstance: IMongooseInstance = new BaseMongooseInstance(connString);
+    private readonly mongooseInstance: MongooseInstance = new BaseMongooseInstance(connString);
     private readonly repository: EventStorage<BankAccount> = new EventStorage(this.mongooseInstance, BankAccount);
 
     constructor() {
@@ -41,29 +41,29 @@ export class MainProgram {
             newAggregate.deposit(random()).setName(`Name ${random()}`);
         }
 
-        this.repository.StartStream(newAggregate);
+        this.repository.startStream(newAggregate);
     }
 
     getAggregate(streamId: any) {
-        this.repository.GetStreamState(streamId)
+        this.repository.getStreamState(streamId)
             .subscribe(streamState => console.log('StreamState', streamState))
 
-        this.repository.GetStream(streamId)
+        this.repository.getStream(streamId)
             .subscribe(aggregate => console.log('Aggregate', aggregate))
     }
 
     getAggregateWithMapReduce(streamId: any) {
-        this.repository.GetStreamWithMapReduce(streamId)
+        this.repository.getStreamWithMapReduce(streamId)
             .subscribe(stream => console.log('GetStreamWIthMapReduce', stream));
     }
 
     appendAggregate(streamId: any) {
         console.log('getting stream to append streamId', streamId);
-        const stream$ = this.repository.GetStream(streamId).subscribe((res) => {
+        const stream$ = this.repository.getStream(streamId).subscribe((res) => {
             res.setName('Hello guys');
             res.deposit(10);
 
-            this.repository.SaveStream(res);
+            this.repository.saveStream(res);
         })
     }
 
@@ -74,11 +74,11 @@ try {
 
     // program.saveAggregate();
 
-    program.getAggregateWithMapReduce('5a089b86fe1985453cece451');
+    // program.getAggregateWithMapReduce('5a089b86fe1985453cece451');
 
     // program.appendAggregate('59b58c8862b75d3db4695cbe');
 
-    // program.getAggregate('59b12a662c09642b64fb541c');
+    program.getAggregate('5a08b662db099920643dd56a');
 
 } catch (err) {
     console.log('Some Exception', err);

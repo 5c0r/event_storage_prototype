@@ -1,12 +1,15 @@
 {
     "compilerOptions": {
-        "target": "es2016",
+        "target": "es6",
         "lib": [
+            "es7",
             "es6",
             "dom"
         ],
         "types": [
+            "karma",
             "mocha",
+            "chai",
             "reflect-metadata",
             "mongoose"
         ],
@@ -22,8 +25,5 @@
     },
     "exclude": [
         "node_modules"
-    ],
-    "files": [
-        "samples/test_run.ts"
     ]
 }
