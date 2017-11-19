@@ -32,7 +32,7 @@
   },
   "scripts": {
     "tsc": "npm run tsc",
-    "test": "jest --coverage",
+    "coverage": "jest --coverage",
     "compileSample": "tsc -p tsconfig.json",
     "runSample": "node compile_output/samples/test_run.js"
   },
