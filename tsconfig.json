@@ -13,16 +13,20 @@
             "reflect-metadata",
             "mongoose"
         ],
-        "sourceMap": false,
-        "outDir": "compile_output",
+        "sourceMap": true,
+        "outDir": "./dist/",
         "module": "commonjs",
         "moduleResolution": "node",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "noImplicitAny": false,
         "removeComments": true,
-        "allowUnreachableCode": false
+        "allowUnreachableCode": false,
+        "declaration": true
     },
+    "include": [
+        "src/**/*"
+    ],
     "exclude": [
         "node_modules"
     ]
