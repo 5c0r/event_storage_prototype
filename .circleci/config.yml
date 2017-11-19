@@ -43,16 +43,16 @@ jobs:
           root: ~/repo
           <<: *whitelist
   test:
-      <<: *defaults
+    <<: *defaults
 
-      steps:
-        - attach_workspace:
-            at: ~/repo
+    steps:
+    - attach_workspace:
+        at: ~/repo
 
-        - run:
-            name: Test TypeScript code
-            command: yarn run coverage
+    - run:
+        name: Test TypeScript code
+        command: yarn run coverage
 
-        - persist_to_workspace:
-            root: ~/repo
-  <<: *whitelist
+    - persist_to_workspace:
+        root: ~/repo
+    <<: *whitelist
