@@ -1,4 +1,4 @@
-import { EventStorage } from './../src/engine/baseRepository';
+import { EventStorage } from './baseRepository';
 import { } from 'jest';
 
 
