@@ -1,10 +1,39 @@
 version: 2
 jobs:
-    build:
-        docker:
-            -image: circleci/node:8.0
-        steps:
-            - checkout
-            - run: 
-                name: Install Deps
-                command: yarn install
+  build:
+    docker:
+      - image: circleci/node:latest
+    steps:
+      - checkout
+      - restore_cache:
+          key: dependency-cache-{{ checksum "yarn.lock" }}
+      - run:
+          name: Install dependencies
+          command: yarn
+      - save_cache:
+          key: dependency-cache-{{ checksum "yarn.lock" }}
+          paths:
+            - node_modules
+      - run: yarn compile
+  test:
+    docker:
+      - image: circleci/node:8
+    steps:
+      - checkout
+      - restore_cache:
+          key: dependency-cache-{{ checksum "yarn.lock" }}
+      - attach_workspace:
+          at: '.'
+      - run: yarn test
+
+workflows:
+  version: 2
+  build_test:
+    jobs:
+      - build
+      - lint:
+          requires:
+            - build
+      - test:
+          requires:
+            - build
