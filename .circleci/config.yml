@@ -14,8 +14,10 @@ jobs:
           key: dependency-cache-{{ checksum "yarn.lock" }}
           paths:
             - node_modules
-      - attach_workspace:
-          at: '.'
+      - persist_to_workspace:
+          root: '.'
+          paths:
+            - src
       - run: yarn compile
   test:
     docker:
