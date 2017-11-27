@@ -1,58 +1,10 @@
-defaults: &defaults
-  working_directory: ~/repo
-  docker:
-    - image: circleci/node:8.0
-
-whitelist: &whitelist
-  paths:
-    - .npmignore
-    - coverage/*
-    - dist/*
-    - node_modules/*
-    - src/*
-    - test/*
-    - CODE_OF_CONDUCT.md
-    - LICENSE.md
-    - package.json
-    - README.md
-    - tsconfig.json
-    - tslint.json
 version: 2
 jobs:
-  checkout:
-    <<: *defaults
-
-    steps:
-      - checkout
-
-      - restore_cache:
-          keys:
-          - v1-dependencies-{{ checksum "package.json" }}
-          - v1-dependencies-
-
-      - run:
-          name: Install Dependencies
-          command: yarn install
-
-      - save_cache:
-          paths:
-            - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
-
-      - persist_to_workspace:
-          root: ~/repo
-          <<: *whitelist
-  test:
-    <<: *defaults
-
-    steps:
-    - attach_workspace:
-        at: ~/repo
-
-    - run:
-        name: Test TypeScript code
-        command: yarn run coverage
-
-    - persist_to_workspace:
-        root: ~/repo
-    <<: *whitelist
+    build:
+        docker:
+            -image: circleci/node:8.0
+        steps:
+            - checkout
+            - run: 
+                name: Install Deps
+                command: yarn install
