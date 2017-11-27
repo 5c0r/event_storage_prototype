@@ -18,8 +18,7 @@ jobs:
       - persist_to_workspace:
           root: '.'
           paths:
-            - lib
-            - build
+            - src
   lint:
     docker:
       - image: circleci/node:latest
