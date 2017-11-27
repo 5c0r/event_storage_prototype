@@ -7,9 +7,6 @@
             "dom"
         ],
         "types": [
-            "karma",
-            "mocha",
-            "chai",
             "reflect-metadata",
             "mongoose"
         ],

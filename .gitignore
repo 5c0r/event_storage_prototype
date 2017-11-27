@@ -1,5 +1,6 @@
 node_modules/
 compile_output/
+dist/
 yarn.lock
 coverage-final.json
 package-lock.json
