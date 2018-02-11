@@ -31,6 +31,7 @@
     "name": "Tri Nguyen"
   },
   "scripts": {
+    "jest": "npm run jest",
     "tsc": "npm run tsc",
     "test": "jest --coverage",
     "compile": "tsc -p tsconfig.json",
