@@ -1,5 +1,5 @@
-import { AggregateBase, SimpleRouter } from './../src/infrastructure/interface/aggregateBase';
-import { EventBase } from './../src/infrastructure/interface/eventBase';
+import { AggregateBase, SimpleRouter } from './../src/infrastructure/interface/aggregate-base';
+import { EventBase } from './../src/infrastructure/interface/event-base';
 
 import { ApplyEvent } from './../src/infrastructure/interface/event';
 

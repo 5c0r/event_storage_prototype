@@ -1,4 +1,4 @@
-import { Event } from './Event';
+import { Event } from './event';
 
 export class EventBase implements Event {
     // TODO
