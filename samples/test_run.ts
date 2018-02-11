@@ -5,11 +5,11 @@ import 'reflect-metadata';
 import * as Mongoose from 'mongoose';
 import { injectable, inject } from 'inversify';
 
-import { BankAccount } from './test_samples';
+import { BankAccount } from './src/model';
 
-import { Repository } from './../src/infrastructure/interface/storage/repository';
-import { EventStorage } from './../src/engine/BaseRepository';
-import { BaseMongooseInstance, MongooseInstance } from './../src/infrastructure/interface/storage/mongoInstance';
+import { Repository } from '@core/infrastructure/interface/storage/repository';
+import { EventStorage } from '@core/engine/base-repository';
+import { BaseMongooseInstance, MongooseInstance } from '@core/infrastructure/interface/storage/mongoInstance';
 
 const connString = 'mongodb://192.168.1.144:27017/event_storage';
 

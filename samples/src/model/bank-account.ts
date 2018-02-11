@@ -1,27 +1,9 @@
-import { AggregateBase, SimpleRouter } from './../src/infrastructure/interface/aggregate-base';
-import { EventBase } from './../src/infrastructure/interface/event-base';
+import { AggregateBase, SimpleRouter } from '@core/infrastructure/interface/aggregate-base';
+import { EventBase } from '@core/infrastructure/interface/event-base';
 
-import { ApplyEvent } from './../src/infrastructure/interface/event';
-
-
-// Sample aggregate creation
-export class AccountDeposited extends EventBase {
-    constructor(public Value: number) {
-        super();
-    }
-}
-
-export class AccountWithdrawed extends EventBase {
-    constructor(public Value: number) {
-        super();
-    }
-}
-
-export class NameSet extends EventBase {
-    constructor(public anotherValue: string) {
-        super();
-    }
-}
+import { ApplyEvent } from '@core/infrastructure/interface/event';
+import { AccountDeposited, NameSet } from './bank-account-events';
+import { AccountWithdrawed } from '../../test_samples';
 
 // Stream of Events 
 export class BankAccount extends AggregateBase {

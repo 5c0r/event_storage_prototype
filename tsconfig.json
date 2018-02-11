@@ -17,12 +17,12 @@
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "noImplicitAny": false,
-        "removeComments": true,
+        "removeComments": false,
         "allowUnreachableCode": false,
         "declaration": true
     },
     "include": [
-        "src/**/*"
+        "src/**/*.ts"
     ],
     "exclude": [
         "node_modules"
