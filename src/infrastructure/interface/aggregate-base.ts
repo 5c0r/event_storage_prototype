@@ -1,5 +1,5 @@
 import * as Mongoose from 'mongoose';
-import { Event, ApplyEvent } from "./event";
+import { Event, ApplyEvent } from './event';
 
 import { AggregateRoot } from './aggregate';
 

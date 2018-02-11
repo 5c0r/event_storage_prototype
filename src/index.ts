@@ -1,4 +1,4 @@
-import { EventStorage } from './engine/baseRepository';
+import { EventStorage } from './engine/base-repository';
 
 
 export { EventStorage };

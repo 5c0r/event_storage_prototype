@@ -1,17 +1,18 @@
-import { EventModel } from './../infrastructure/db_schema/eventModel';
+import { EventModel } from './../infrastructure/db_schema/event-model';
 import { Repository } from './../infrastructure/interface/storage/repository';
 import { AggregateEvent, Event, AggregateEventDbSchema } from './../infrastructure/interface/event';
 import { AggreateStreamState } from './../infrastructure/interface/aggregate';
 import { MongooseInstance } from './../infrastructure/interface/storage/mongoInstance';
 
-import { AggregateBase } from './../infrastructure/interface/aggregateBase';
-import { StreamStateBase } from './../infrastructure/interface/streamStateBase';
+import { AggregateBase } from './../infrastructure/interface/aggregate-base';
+import { StreamStateBase } from './../infrastructure/interface/stream-state-base';
 
 import * as Mongoose from 'mongoose';
 
 import { Observable as Observer } from 'rxjs';
 import { Observable } from 'rxjs/Observable';
 
+// MongoDB javscript specific function
 declare const emit: Function;
 
 export class EventStorage<T1 extends AggregateBase> implements Repository<T1> {
