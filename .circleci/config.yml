@@ -6,14 +6,14 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: dependency-cache-{{ checksum "yarn.lock" }}
+        key: dependency-cache-{{ checksum "yarn.lock" }}
       - run:
           name: Install dependencies
           command: yarn install
-      - save_cache:
-          key: dependency-cache-{{ checksum "yarn.lock" }}
-          paths:
-            - node_modules
+          - save_cache:
+            key: dependency-cache-{{ checksum "yarn.lock" }}
+            paths:
+              - node_modules
       - persist_to_workspace:
           root: '.'
           paths:
@@ -27,10 +27,13 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: dependency-cache-{{ checksum "yarn.lock" }}
+        key: dependency-cache-{{ checksum "yarn.lock" }}
+      - run:
+        name: Install dependencies
+        command: yarn install
       - attach_workspace:
           at: '.'
-      - run: yarn test
+      - run: yarn run test
 
 workflows:
   version: 2
