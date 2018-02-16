@@ -1,14 +1,11 @@
 {
   "name": "event_storage_prototype",
-  "version": "0.0.6",
-  "private": true,
+  "version": "0.1.0",
+  "private": false,
   "license": "MIT",
   "dependencies": {
     "bluebird": "^3.5.0",
-    "body-parser": "^1.17.2",
     "immutable": "^3.8.2",
-    "express": "^4.15.4",
-    "inversify": "^4.10.0",
     "mongoose": "^5.0.4",
     "reflect-metadata": "^0.1.10"
   },
@@ -17,7 +14,7 @@
     "@types/mongodb": "^3.0.5",
     "@types/mongoose": "^5.0.1",
     "@types/jest": "^22.1.2",
-    "@types/reflect-metadata": "^0.0.5",
+    "@types/reflect-metadata": "^0.1.0",
     "jest": "^22.2.2",
     "ts-jest": "^22.0.3",
     "istanbul": "^0.4.5",

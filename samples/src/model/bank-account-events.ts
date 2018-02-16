@@ -1,4 +1,4 @@
-import { EventBase } from "../../../src/infrastructure/interface/event-base";
+import { EventBase } from 'core/infrastructure/interface/event-base';
 
 // Sample aggregate creation
 export class AccountDeposited extends EventBase {
@@ -15,6 +15,12 @@ export class AccountWithdrawed extends EventBase {
 
 export class NameSet extends EventBase {
     constructor(public anotherValue: string) {
+        super();
+    }
+}
+
+export class AccountCreated extends EventBase {
+    constructor(public readonly name: string, public readonly startBalance: number, public readonly creationDate: Date) {
         super();
     }
 }

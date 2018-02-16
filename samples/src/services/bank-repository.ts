@@ -1,39 +1,23 @@
-// Polyfills
-import 'reflect-metadata';
-// End of polyfills
+import { IRead, IWrite } from '.';
+import { BankAccount } from '../model';
 
-import * as Mongoose from 'mongoose';
-import { injectable, inject } from 'inversify';
-
-import { BankAccount } from './src/model';
-
-import { Repository } from '@core/infrastructure/interface/storage/repository';
-import { EventStorage } from '@core/engine/base-repository';
-import { BaseMongooseInstance, MongooseInstance } from '@core/infrastructure/interface/storage/mongoInstance';
+import { Repository } from 'core/infrastructure/interface/storage/repository';
+import { EventStorage } from 'core/engine/base-repository';
+import { BaseMongooseInstance, MongooseInstance } from 'core/infrastructure/interface/storage/mongo-instance';
+import { ObjectId } from 'bson';
 
 const connString = 'mongodb://192.168.1.144:27017/event_storage';
 
-const Injections = {
-    ConnectionString: connString
-}
+export class BankAccountRepository implements IRead, IWrite {
 
-// Enum , Id generation strategy
-enum IdentifierStrategy {
-    Default = 0,
-    Advanced = 1
-}
-
-@injectable()
-export class MainProgram {
     private readonly mongooseInstance: MongooseInstance = new BaseMongooseInstance(connString);
     private readonly repository: EventStorage<BankAccount> = new EventStorage(this.mongooseInstance, BankAccount);
 
     constructor() {
-        console.log('mongooseInstance', this.mongooseInstance);
         this.mongooseInstance.initialize();
     }
 
-    saveAggregate() {
+    saveAggregate(): ObjectId {
         const newAggregate = new BankAccount();
 
         for (let i = 0; i < 10; i++) {
@@ -41,7 +25,10 @@ export class MainProgram {
             newAggregate.deposit(random()).setName(`Name ${random()}`);
         }
 
-        this.repository.startStream(newAggregate);
+        const streamId = this.repository.startStream(newAggregate);
+        console.log(`Newly created streamId ${streamId}`);
+
+        return streamId;
     }
 
     getAggregate(streamId: any) {
@@ -68,21 +55,3 @@ export class MainProgram {
     }
 
 }
-
-try {
-    const program = new MainProgram();
-
-    // program.saveAggregate();
-
-    // program.getAggregateWithMapReduce('5a089b86fe1985453cece451');
-
-    // program.appendAggregate('59b58c8862b75d3db4695cbe');
-
-    program.getAggregate('5a08b662db099920643dd56a');
-
-} catch (err) {
-    console.log('Some Exception', err);
-    process.exit(0);
-}
-
-

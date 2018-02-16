@@ -2,7 +2,7 @@ import { EventModel } from './../infrastructure/db_schema/event-model';
 import { Repository } from './../infrastructure/interface/storage/repository';
 import { AggregateEvent, Event, AggregateEventDbSchema } from './../infrastructure/interface/event';
 import { AggreateStreamState } from './../infrastructure/interface/aggregate';
-import { MongooseInstance } from './../infrastructure/interface/storage/mongoInstance';
+import { MongooseInstance } from './../infrastructure/interface/storage/mongo-instance';
 
 import { AggregateBase } from './../infrastructure/interface/aggregate-base';
 import { StreamStateBase } from './../infrastructure/interface/stream-state-base';
@@ -11,13 +11,14 @@ import * as Mongoose from 'mongoose';
 
 import { Observable as Observer } from 'rxjs';
 import { Observable } from 'rxjs/Observable';
+import { ObjectId } from 'bson';
 
 // MongoDB javscript specific function
 declare const emit: Function;
 
 export class EventStorage<T1 extends AggregateBase> implements Repository<T1> {
 
-    constructor(private readonly mongoose: MongooseInstance, private typeConstructor: { new(): T1 }) {
+    constructor(private readonly mongoose: MongooseInstance, private readonly typeConstructor: { new(): T1 }) {
 
     }
 
@@ -29,13 +30,15 @@ export class EventStorage<T1 extends AggregateBase> implements Repository<T1> {
 
     }
 
-    public startStream(aggregate: T1, withEvents?: any[]): void {
+    public startStream(aggregate: T1, withEvents?: any[]): ObjectId {
         try {
             const actionId = Math.random();
             aggregate._id = new Mongoose.Types.ObjectId();
             this.mongooseGuard();
             console.log('Creating new stream', aggregate._id);
             this.appendStream(aggregate._id, aggregate.UncommittedEvents, true, aggregate.Version);
+
+            return aggregate._id;
         } catch (error) {
             throw error;
         }

@@ -2,8 +2,9 @@
     "extends": "./../tsconfig",
     "compilerOptions": {
         "baseUrl": "./",
+        "outDir": "./dist",
         "paths": {
-            "@core/*": [ "./../src/*" ]
+            "core/*": [ "./../src/*" ]
         },
         "experimentalDecorators": true
     },
