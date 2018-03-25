@@ -7,6 +7,7 @@
             "dom"
         ],
         "types": [
+            "jest",
             "reflect-metadata",
             "mongoose",
             "rxjs",
