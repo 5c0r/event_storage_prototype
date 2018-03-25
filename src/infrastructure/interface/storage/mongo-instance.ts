@@ -1,5 +1,5 @@
 import * as Mongoose from 'mongoose';
-import { injectable } from 'inversify';
+// import { injectable } from 'inversify';
 
 export interface MongooseInstance {
     connection: Mongoose.Connection;
@@ -16,7 +16,6 @@ export interface IStorageOption extends Mongoose.ConnectionOpenOptions, Mongoose
 
 }
 
-@injectable()
 export class BaseMongooseInstance implements MongooseInstance {
 
     public connection: Mongoose.Connection;

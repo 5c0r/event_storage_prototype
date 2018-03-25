@@ -8,7 +8,9 @@
         ],
         "types": [
             "reflect-metadata",
-            "mongoose"
+            "mongoose",
+            "rxjs",
+            "rxjs-compat"
         ],
         "sourceMap": true,
         "outDir": "./dist/",
