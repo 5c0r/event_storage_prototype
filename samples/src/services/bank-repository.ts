@@ -1,12 +1,11 @@
 import { IRead, IWrite } from '.';
 import { BankAccount } from '../model';
 
-import { Repository } from 'core/infrastructure/interface/storage/repository';
-import { EventStorage } from 'core/engine/base-repository';
-import { BaseMongooseInstance, MongooseInstance } from 'core/infrastructure/interface/storage/mongo-instance';
 import { ObjectId } from 'bson';
+import { MongooseInstance, BaseMongooseInstance } from '../../../src/infrastructure/interface/storage/mongo-instance';
+import { EventStorage } from '../../../src';
 
-const connString = 'mongodb://192.168.1.144:27017/event_storage';
+const connString = 'mongodb://127.0.0.1:27017/event_storage';
 
 export class BankAccountRepository implements IRead, IWrite {
 
@@ -32,8 +31,9 @@ export class BankAccountRepository implements IRead, IWrite {
     }
 
     getAggregate(streamId: any) {
-        this.repository.getStreamState(streamId)
-            .subscribe(streamState => console.log('StreamState', streamState))
+        // TODO
+        // this.repository.getStreamState(streamId)
+        //     .subscribe(streamState => console.log('StreamState', streamState))
 
         this.repository.getStream(streamId)
             .subscribe(aggregate => console.log('Aggregate', aggregate))

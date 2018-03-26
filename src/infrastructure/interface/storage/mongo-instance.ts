@@ -1,5 +1,4 @@
 import * as Mongoose from 'mongoose';
-// import { injectable } from 'inversify';
 
 export interface MongooseInstance {
     connection: Mongoose.Connection;

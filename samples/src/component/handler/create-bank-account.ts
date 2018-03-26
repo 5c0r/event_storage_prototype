@@ -4,6 +4,8 @@ import { Observable } from "rxjs/Observable";
 import { of } from "rxjs";
 
 export class CreateBankAccountHandler implements IHandle<CreateBankAccount> {
+    name: string = 'CreateBankAccountHandler';
+
     handle: IHandleFn<CreateBankAccount> = (message: CreateBankAccount): Observable<any> => {
         console.log('Handling message CreateBankAccount');
         return of();

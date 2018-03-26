@@ -1,6 +1,9 @@
 node_modules/
 compile_output/
 dist/
+
 yarn.lock
+yarn-error.log
+
 coverage-final.json
 package-lock.json

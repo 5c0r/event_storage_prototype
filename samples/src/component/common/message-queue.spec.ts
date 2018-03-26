@@ -7,30 +7,40 @@ import { of } from 'rxjs';
 import { timeout } from 'rxjs/operators';
 import { setTimeout } from 'timers';
 
-class TestMessage implements Message {
-
-}
-
-class TestHandler implements IHandle<TestMessage> {
-    name = 'TestHandler';
-
-    handle: IHandleFn<TestMessage> = (msg: TestMessage): Observable<any> => {
-        return of();
-    }
-}
-
-class AnotherTestHandler implements IHandle<TestMessage> {
-    name = 'AnotherTestHandler';
-
-    handle: IHandleFn<TestMessage> = (msg: TestMessage): Observable<any> => {
-        return of();
-    }
-}
 
 
 
 describe('Message Queue', () => {
-    const queueUnderTest = MessageQueue;
+
+    class TestMessage implements Message {
+
+    }
+
+    class TestHandler implements IHandle<TestMessage> {
+        name = 'TestHandler';
+
+        handle: IHandleFn<TestMessage> = (msg: TestMessage): Observable<any> => {
+            console.log('hello', msg, typeof msg);
+            return of();
+        }
+    }
+
+    class AnotherTestHandler implements IHandle<TestMessage> {
+        name = 'AnotherTestHandler';
+
+        handle: IHandleFn<TestMessage> = (msg: TestMessage): Observable<any> => {
+            console.log('hello', msg, typeof msg);
+
+            return of();
+        }
+    }
+
+
+    let queueUnderTest = new MessageQueue();
+
+    beforeEach(async () => {
+        queueUnderTest = new MessageQueue();
+    })
 
     test('smoke test', () => {
         expect(MessageQueue).toBeTruthy();
@@ -47,22 +57,22 @@ describe('Message Queue', () => {
     })
 
     // TODO: This test does not work yet
-    // test('should be able to dispatch a message to the queue', async () => {
-    //     const handler = new TestHandler();
-    //     const another = new AnotherTestHandler();
+    test('should be able to dispatch a message to the queue', async () => {
+        const handler = new TestHandler();
+        const another = new AnotherTestHandler();
 
-    //     const message = new TestMessage();
+        const message = new TestMessage();
 
-    //     queueUnderTest.Register(handler);
-    //     queueUnderTest.Register(another);
+        queueUnderTest.Register(handler);
+        queueUnderTest.Register(another);
 
-    //     // queueUnderTest q
-    //     queueUnderTest.GetInstance().subscribe( res => {
-    //         expect(res).toBe(null);
-    //     })
+        queueUnderTest.GetInstance.toPromise().then((value: Message) => {
+            expect(value).toBe(null);
+            expect(true).toBe(false);
+        })
 
-    //     expect(Object.keys(queueUnderTest.Router).length).toBe(1);
+        expect(Object.keys(queueUnderTest.Router).length).toBe(2);
 
-    //     queueUnderTest.Send(message);
-    // })
+        queueUnderTest.Send(message);
+    });
 })

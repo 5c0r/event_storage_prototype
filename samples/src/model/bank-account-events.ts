@@ -1,4 +1,4 @@
-import { EventBase } from 'core/infrastructure/interface/event-base';
+import { EventBase } from "../../../src/infrastructure/interface/event-base";
 
 // Sample aggregate creation
 export class AccountDeposited extends EventBase {

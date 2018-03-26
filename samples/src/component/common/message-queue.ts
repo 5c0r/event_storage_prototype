@@ -6,21 +6,18 @@ import { Subscription } from "rxjs";
 import { map } from "rxjs/operators";
 
 export class MessageQueue {
-    private static readonly messagePipe = new Subject<Message>();
-    public static readonly TestPipe = MessageQueue.messagePipe.asObservable().pipe(
-        map(msg => msg)
-    )
-    public static readonly GetInstance = () => MessageQueue.messagePipe.asObservable();
+    private readonly messagePipe = new Subject<Message>();
+    public readonly GetInstance: Observable<Message> = this.messagePipe;
 
-    private static router: { [key: string]: Subscription } = {};
-    public static Router: { [key: string]: Subscription } = MessageQueue.router;
+    private router: { [key: string]: Subscription } = {};
+    public Router: { [key: string]: Subscription } = this.router;
 
 
-    public static Send<Message>(message: Message): void {
+    public Send<Message>(message: Message): void {
         this.messagePipe.next(message);
     }
 
-    public static Register(handler: IHandle<Message>): void {
+    public Register(handler: IHandle<Message>): void {
         const msgSubscription = this.messagePipe
             .subscribe(message => handler.handle(message));
 
@@ -28,8 +25,7 @@ export class MessageQueue {
         this.router[`${handler.name}`] = msgSubscription;
     }
 
-    public static UnRegister<T>(handler: IHandle<T>): void {
-        // this.Router[]
-        // this.messagePipe.
+    public UnRegister<T>(handler: IHandle<T>): void {
+        delete this.router[`${handler.name}`];
     }
 }

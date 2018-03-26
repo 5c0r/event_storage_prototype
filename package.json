@@ -34,7 +34,8 @@
     "test": "jest --coverage",
     "compile": "tsc -p tsconfig.json",
     "lint": "tslint tsconfig.json",
-    "runSample": "node compile_output/samples/test_run.js"
+    "compileSample": "tsc -p samples/tsconfig.json",
+    "runSample": ""
   },
   "jest": {
     "transform": {

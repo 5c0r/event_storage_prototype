@@ -1,8 +1,7 @@
-import { AggregateBase, SimpleRouter } from 'core/infrastructure/interface/aggregate-base';
-import { EventBase } from 'core/infrastructure/interface/event-base';
 
-import { ApplyEvent } from 'core/infrastructure/interface/event';
+
 import { AccountCreated, AccountDeposited, AccountWithdrawed, NameSet } from './bank-account-events';
+import { AggregateBase } from '../../../src/infrastructure/interface/aggregate-base';
 
 export interface IBankAccount {
     accountName: string;
