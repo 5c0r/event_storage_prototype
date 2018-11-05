@@ -1,7 +1,6 @@
 // Polyfills
 import 'reflect-metadata';
 // End of polyfills
-
 import { BankAccountRepository } from './../samples/src/services/bank-repository';
 
 try {

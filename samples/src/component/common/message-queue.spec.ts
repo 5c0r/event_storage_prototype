@@ -1,5 +1,5 @@
 import { MessageQueue } from './message-queue';
-import { } from 'jest';
+// import { } from 'jest';
 import { Message } from '../message/message.interface';
 import { IHandle, IHandleFn } from '../command/handle.interface';
 import { Observable } from 'rxjs/Observable';

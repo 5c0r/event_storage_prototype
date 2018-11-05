@@ -1,5 +1,3 @@
-
-
 import { AccountCreated, AccountDeposited, AccountWithdrawed, NameSet } from './bank-account-events';
 import { AggregateBase } from '../../../src/infrastructure/interface/aggregate-base';
 
@@ -38,7 +36,7 @@ export class BankAccount extends AggregateBase {
         this.RegisterEvent(AccountCreated, this.accountCreated);
         this.RegisterEvent(AccountDeposited, this.accountDeposited);
         this.RegisterEvent(NameSet, this.accountHolderSet);
-        this.RegisterEvent(AccountWithdrawed, this.accountWithdrawed)
+        this.RegisterEvent(AccountWithdrawed, this.accountWithdrawed);
     }
 
     // Getters

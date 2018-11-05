@@ -17,7 +17,7 @@ export class SimpleRouter implements EventRouter {
     }
 
     register(): void {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 
@@ -30,6 +30,9 @@ export abstract class AggregateBase implements AggregateRoot {
 
     private _uncommittedEvents: Event[] = [];
     private _committedEvents: Event[] = [];
+
+    public readonly UncommittedEvents = this._uncommittedEvents;
+    public readonly CommittedEvents = this._committedEvents;
 
     constructor() {
 
@@ -53,7 +56,9 @@ export abstract class AggregateBase implements AggregateRoot {
     public RegisterEvent(evType: any, eventFunc: ApplyEvent<Event>): void {
         const type = evType.name;
 
-        if (!eventFunc) throw new Error(`Event applier for ${type} is undefined !`);
+        if (!eventFunc) {
+            throw new Error(`Event applier for ${type} is undefined !`);
+        }
 
         if (!this._eventRouter[type]) {
             this._eventRouter[type] = eventFunc;
@@ -62,17 +67,17 @@ export abstract class AggregateBase implements AggregateRoot {
         }
     }
 
-    public readonly UncommittedEvents = this._uncommittedEvents;
-    public readonly CommittedEvents = this._committedEvents;
+
 
     private InvokeEvent(event: Event, evType?: string, isFetching?: boolean): void {
         this._eventRouter[evType || event.constructor.name](event);
 
-        if (!isFetching) this._uncommittedEvents.push(event);
-        else this._committedEvents.push(event);
-
+        if (!isFetching) {
+            this._uncommittedEvents.push(event);
+        } else {
+            this._committedEvents.push(event);
+        }
         this.Version++;
-        // this.LastModified = event.
     }
 }
 

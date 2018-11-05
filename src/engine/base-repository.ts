@@ -1,21 +1,18 @@
+import { ObjectId } from 'bson';
+import * as Mongoose from 'mongoose';
+import { Observable, of, throwError } from 'rxjs';
+import { fromPromise } from 'rxjs/internal/observable/fromPromise';
+import { map } from 'rxjs/operators';
 import { EventModel } from './../infrastructure/db_schema/event-model';
-import { Repository } from './../infrastructure/interface/storage/repository';
-import { AggregateEvent, Event, AggregateEventDbSchema } from './../infrastructure/interface/event';
 import { AggreateStreamState } from './../infrastructure/interface/aggregate';
-import { MongooseInstance } from './../infrastructure/interface/storage/mongo-instance';
-
 import { AggregateBase } from './../infrastructure/interface/aggregate-base';
+import { AggregateEvent, AggregateEventDbSchema, Event } from './../infrastructure/interface/event';
+import { MongooseInstance } from './../infrastructure/interface/storage/mongo-instance';
+import { Repository } from './../infrastructure/interface/storage/repository';
 import { StreamStateBase } from './../infrastructure/interface/stream-state-base';
 
-import * as Mongoose from 'mongoose';
 
-import { ObjectId } from 'bson';
-import { Observable } from 'rxjs/Observable';
-import { of, throwError } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { fromPromise } from 'rxjs/internal/observable/fromPromise';
-
-// MongoDB javscript specific function
+// MongoDB javascript specific function
 declare const emit: Function;
 
 export class EventStorage<T1 extends AggregateBase> implements Repository<T1> {
@@ -37,7 +34,7 @@ export class EventStorage<T1 extends AggregateBase> implements Repository<T1> {
             const actionId = Math.random();
             aggregate._id = new Mongoose.Types.ObjectId();
             this.mongooseGuard();
-            console.log('Creating new stream', aggregate._id);
+            // console.log('Creating new stream', aggregate._id);
             this.appendStream(aggregate._id, aggregate.UncommittedEvents, true, aggregate.Version);
 
             return aggregate._id;
@@ -45,6 +42,21 @@ export class EventStorage<T1 extends AggregateBase> implements Repository<T1> {
             throw error;
         }
     }
+
+    public startStreamWithEvents(events: any[]): ObjectId {
+        try {
+            const streamId = new Mongoose.Types.ObjectId();
+            this.mongooseGuard();
+
+            this.appendStream(streamId, events, true)
+
+            return streamId;
+
+        } catch (error) {
+            throw error;
+        }
+    }
+
 
     private fromEvents(events: Event[], streamId: any, actionId: number, start?: number): AggregateEventDbSchema[] {
         return events.map((ev: Event, index) => this.fromEvent(streamId, ev, (start || 1) + index, actionId));
@@ -67,7 +79,7 @@ export class EventStorage<T1 extends AggregateBase> implements Repository<T1> {
         return EventModel.insertMany(events).then(res => { console.log('persisted', res); return res; });
     }
 
-    public appendStream(streamId: string, events: any[], newStream: boolean = false, version?: number): void {
+    public appendStream(streamId: string | any, events: any[], newStream: boolean = false, version?: number): void {
         try {
 
             const actionId = Math.random();
@@ -77,7 +89,7 @@ export class EventStorage<T1 extends AggregateBase> implements Repository<T1> {
 
                 console.log('outerExpected', state, state.CurrentVersion, events.length);
 
-                if (innerExpectedVersion != outerExpectedVersion) {
+                if (innerExpectedVersion !== outerExpectedVersion) {
                     throw new Error('Stream version mismatch !');
                 }
                 return state;
@@ -105,6 +117,7 @@ export class EventStorage<T1 extends AggregateBase> implements Repository<T1> {
         }
     }
 
+    // I thought it was a PoC, I was wrong
     public getStream(streamId: string, version?: number): Observable<T1> {
         // 1st approach , WORKING
         return this.getEvents(streamId, version).pipe(
@@ -118,6 +131,8 @@ export class EventStorage<T1 extends AggregateBase> implements Repository<T1> {
             })
         );
     }
+
+    // public getProjection() : Observable<
 
     // What we call 'Aggregators'
     private buildAggregateFromEvents(events: Event[]): T1 {
@@ -152,20 +167,33 @@ export class EventStorage<T1 extends AggregateBase> implements Repository<T1> {
         query = version ? query.where('Version').lte(version) : query;
 
         return fromPromise(query.sort({ Version: 1 }).then(res => {
-            if (version && res.length != version) {
+            if (version && res.length !== version) {
                 throw new Error(`Invalid stream, Looking for version ${version} but only found ${res.length} events`);
             }
             return res;
         }));
     }
 
+    public getEventsByTypes(streamId: string, types: any[] = []): Observable<Event[]> {
+
+        let query = EventModel.find({ StreamId: streamId });
+
+        types.forEach((type) => query = query.where('Type').equals(type));
+
+        return fromPromise(query.sort({ Version: 1 }).then(res => {
+            // TODO
+            return res;
+        }));
+    }
+
     private mongooseGuard(): void {
-        if (!this.mongoose || this.mongoose == null)
+        if (!this.mongoose || this.mongoose == null) {
             throw new Error('No mongoose instance instantiated !');
+        }
     }
 
     public getStreamWithMapReduce(streamId: any, version?: number): Observable<T1> {
-        let query: { [key: string]: any } = {
+        const query: { [key: string]: any } = {
             'StreamId': streamId,
         }
 
@@ -175,7 +203,7 @@ export class EventStorage<T1 extends AggregateBase> implements Repository<T1> {
             }
         }
 
-        const mrOptions: Mongoose.ModelMapReduceOption<AggregateEventDbSchema, Mongoose.Types.ObjectId, any> = {
+        const mapReduceOpts: Mongoose.ModelMapReduceOption<AggregateEventDbSchema, Mongoose.Types.ObjectId, any> = {
             query: query,
             map: function map() {
                 emit(this._id, { item: this })
@@ -194,8 +222,8 @@ export class EventStorage<T1 extends AggregateBase> implements Repository<T1> {
             }
         }
 
-        return Observable.fromPromise(EventModel.mapReduce(mrOptions).then(res => {
-            if (res.length == 0) return null;
+        return Observable.fromPromise(EventModel.mapReduce(mapReduceOpts).then(res => {
+            if (res.length === 0) { return null; }
 
             //https://stackoverflow.com/questions/28149213/mongodb-mapreduce-method-unexpected-results#28161632
             const aggregate = new this.typeConstructor();
