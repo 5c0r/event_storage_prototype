@@ -1,4 +1,4 @@
-import { IRead } from './read.interface';
-import { IWrite } from './write.interface';
+import { IReadBankAccount } from './read.interface';
+import { IWriteBankAccount } from './write.interface';
 
-export { IRead, IWrite };
+export { IReadBankAccount, IWriteBankAccount };

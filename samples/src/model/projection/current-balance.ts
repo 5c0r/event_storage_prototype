@@ -1,8 +1,12 @@
 import { ProjectionBase } from '../../../../src/infrastructure/interface/stream-state-base';
 import { AccountCreated, AccountDeposited, AccountWithdrawed } from '../bank-account-events';
 
-export class BankAccountBalance extends ProjectionBase {
+export class CurrentBalance extends ProjectionBase {
+
     private balance: number = 0;
+    public get Balance(): number {
+        return this.balance;
+    }
 
     constructor(streamId: any) {
         super(streamId);
@@ -14,11 +18,6 @@ export class BankAccountBalance extends ProjectionBase {
         this.RegisterEvent(AccountCreated, this.accountCreated);
         this.RegisterEvent(AccountDeposited, this.accountDeposited);
         this.RegisterEvent(AccountWithdrawed, this.accountWithdrawed);
-    }
-
-
-    public get Balance(): number {
-        return this.balance;
     }
 
     // Appliers

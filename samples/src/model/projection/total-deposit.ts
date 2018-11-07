@@ -1,7 +1,7 @@
 import { ProjectionBase } from '../../../../src/infrastructure/interface/stream-state-base';
 import { AccountCreated, AccountDeposited } from '../bank-account-events';
 
-export class BankTotalDeposit extends ProjectionBase {
+export class AccountTotalDeposit extends ProjectionBase {
     private totalDeposit: number = 0;
 
     constructor(streamId: any) {
