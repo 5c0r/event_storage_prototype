@@ -79,15 +79,19 @@ export class EventStorage<T1 extends AggregateBase> implements Repository<T1> {
         return EventModel.insertMany(events).then(res => { console.log('persisted', res); return res; });
     }
 
-    public appendStream(streamId: string | any, events: any[], newStream: boolean = false, version?: number): void {
+    public appendStream(streamId: string | any, events: any[], newStream: boolean = false, expectedVersion?: number): void {
         try {
 
             const actionId = Math.random();
-            const streamState$ = newStream ? of(new StreamStateBase()) : this.getStreamState(streamId).map((state: any) => {
-                const innerExpectedVersion: number = version || (state.CurrentVersion + events.length);
+
+            // Split this into another observable , then we can merge observable and do any action we like
+            const streamState$ = newStream ? of(new StreamStateBase()) : this.getStreamState(streamId)
+            // TODO: Put this to tap or something else, this hurts my brain
+            .map((state: any) => {
+                const innerExpectedVersion: number = expectedVersion || (state.CurrentVersion + events.length);
                 const outerExpectedVersion: number = state.CurrentVersion + events.length;
 
-                console.log('outerExpected', state, state.CurrentVersion, events.length);
+                // console.log('outerExpected', state, state.CurrentVersion, events.length);
 
                 if (innerExpectedVersion !== outerExpectedVersion) {
                     throw new Error('Stream version mismatch !');
@@ -105,6 +109,7 @@ export class EventStorage<T1 extends AggregateBase> implements Repository<T1> {
             throw new Error(`Error while appending stream ${streamId} ${err}`);
         }
     }
+
 
     public saveStream(aggregate: T1, version?: number): void {
         try {
@@ -132,8 +137,6 @@ export class EventStorage<T1 extends AggregateBase> implements Repository<T1> {
         );
     }
 
-    // public getProjection() : Observable<
-
     // What we call 'Aggregators'
     private buildAggregateFromEvents(events: Event[]): T1 {
         const aggregate = new this.typeConstructor();
@@ -142,6 +145,7 @@ export class EventStorage<T1 extends AggregateBase> implements Repository<T1> {
         return aggregate;
     }
 
+    // TODO: How about a stream that does not exist ?????????
     public getStreamState(streamId: string): Observable<AggreateStreamState> {
         try {
             // return this.GetEvents(streamId)
