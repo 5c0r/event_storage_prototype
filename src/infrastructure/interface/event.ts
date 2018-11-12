@@ -1,16 +1,14 @@
 import * as Mongoose from 'mongoose';
 
-export interface Event {
+export interface IAmEvent {
 }
 
-export interface ApplyEvent<T extends Event> {
-    (ev: T): void;
-}
+export type ApplyEvent<T extends IAmEvent> = (ev: T) => void;
 
 export interface AggregateEvent {
     ActionId: any;
-    StreamId: AAGUID;
-    Data: Event;
+    StreamId: any;
+    Data: IAmEvent;
     Type: string;
     Version: Number;
     AppendDate: Date;

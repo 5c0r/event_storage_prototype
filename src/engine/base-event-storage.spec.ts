@@ -1,4 +1,4 @@
-import { EventStorage } from './base-repository';
+import { EventStorage } from './base-event-storage';
 
 
 describe('EventStorage', () => {

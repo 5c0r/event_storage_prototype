@@ -1,6 +1,6 @@
-import { Event } from './event';
+import { IAmEvent } from './event';
 
-export class EventBase implements Event {
+export class EventBase implements IAmEvent {
     // TODO
     AffectVersion: Number;
 

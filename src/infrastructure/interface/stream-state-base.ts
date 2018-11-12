@@ -1,5 +1,5 @@
 import { AggreateStreamState } from './aggregate';
-import { ApplyEvent, Event } from './event';
+import { ApplyEvent, IAmEvent } from './event';
 import { EventRouter } from './aggregate-base';
 
 export class StreamStateBase implements AggreateStreamState {
@@ -22,7 +22,7 @@ export abstract class ProjectionBase extends StreamStateBase {
         super(streamId);
     }
 
-    public ApplyEvent(ev: Event, evType?: string): void {
+    public ApplyEvent(ev: IAmEvent, evType?: string): void {
         const className = evType || ev.constructor.name;
         /**
          * Rationale: Projection can only cares about some events, so we can just register
@@ -35,7 +35,7 @@ export abstract class ProjectionBase extends StreamStateBase {
         this.InvokeEvent(ev, evType);
     }
 
-    public RegisterEvent(evType: any, eventFunc: ApplyEvent<Event>): void {
+    public RegisterEvent(evType: any, eventFunc: ApplyEvent<IAmEvent>): void {
         const type = evType.name;
 
         if (!eventFunc) {
@@ -49,7 +49,7 @@ export abstract class ProjectionBase extends StreamStateBase {
         }
     }
 
-    private InvokeEvent(event: Event, evType?: string): void {
+    private InvokeEvent(event: IAmEvent, evType?: string): void {
         this._eventRouter[evType || event.constructor.name](event);
 
         this.CurrentVersion++;

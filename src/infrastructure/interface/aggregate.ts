@@ -1,5 +1,5 @@
 import * as Mongoose from 'mongoose';
-import { Event } from './event';
+import { IAmEvent } from './event';
 
 // TODO: other field as ObjectId
 export interface AggregateRoot {
@@ -7,8 +7,8 @@ export interface AggregateRoot {
     Version: number;
     LastModified: Date;
 
-    UncommittedEvents: Event[];
-    CommittedEvents: Event[];
+    UncommittedEvents: IAmEvent[];
+    CommittedEvents: IAmEvent[];
 }
 
 export interface AggreateStreamState {

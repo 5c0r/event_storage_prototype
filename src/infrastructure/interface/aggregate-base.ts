@@ -1,16 +1,16 @@
 import * as Mongoose from 'mongoose';
-import { Event, ApplyEvent } from './event';
+import { IAmEvent, ApplyEvent } from './event';
 
 import { AggregateRoot } from './aggregate';
 
 export interface EventRouter {
-    [type: string]: ApplyEvent<Event>;
+    [type: string]: ApplyEvent<IAmEvent>;
 
     register?(): void;
 }
 
 export class SimpleRouter implements EventRouter {
-    [type: string]: ApplyEvent<Event>;
+    [type: string]: ApplyEvent<IAmEvent>;
 
     constructor() {
 
@@ -28,8 +28,8 @@ export abstract class AggregateBase implements AggregateRoot {
 
     private _eventRouter: EventRouter = {};
 
-    private _uncommittedEvents: Event[] = [];
-    private _committedEvents: Event[] = [];
+    private _uncommittedEvents: IAmEvent[] = [];
+    private _committedEvents: IAmEvent[] = [];
 
     public readonly UncommittedEvents = this._uncommittedEvents;
     public readonly CommittedEvents = this._committedEvents;
@@ -45,7 +45,7 @@ export abstract class AggregateBase implements AggregateRoot {
         this.LastModified = lastModified;
     }
 
-    public RaiseEvent(ev: Event, evType?: string, isFetching?: boolean): void {
+    public RaiseEvent(ev: IAmEvent, evType?: string, isFetching?: boolean): void {
         const className = evType || ev.constructor.name;
         if (!this._eventRouter[className]) {
             throw new Error(`No event router found for ${className}`);
@@ -53,7 +53,7 @@ export abstract class AggregateBase implements AggregateRoot {
         this.InvokeEvent(ev, evType, isFetching || false);
     }
 
-    public RegisterEvent(evType: any, eventFunc: ApplyEvent<Event>): void {
+    public RegisterEvent(evType: any, eventFunc: ApplyEvent<IAmEvent>): void {
         const type = evType.name;
 
         if (!eventFunc) {
@@ -69,7 +69,7 @@ export abstract class AggregateBase implements AggregateRoot {
 
 
 
-    private InvokeEvent(event: Event, evType?: string, isFetching?: boolean): void {
+    private InvokeEvent(event: IAmEvent, evType?: string, isFetching?: boolean): void {
         this._eventRouter[evType || event.constructor.name](event);
 
         if (!isFetching) {

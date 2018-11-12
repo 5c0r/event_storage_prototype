@@ -12,4 +12,4 @@ const EventSchema = new Mongoose.Schema({
 
 const EventModel = Mongoose.model<AggregateEventDbSchema>('aggregate_events', EventSchema);
 
-export { EventSchema, EventModel }
+export { EventSchema, EventModel };

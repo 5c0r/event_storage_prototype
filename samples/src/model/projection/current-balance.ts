@@ -1,7 +1,11 @@
 import { ProjectionBase } from '../../../../src/infrastructure/interface/stream-state-base';
 import { AccountCreated, AccountDeposited, AccountWithdrawed } from '../bank-account-events';
 
-export class CurrentBalance extends ProjectionBase {
+export interface IHaveBalance {
+    Balance: number;
+}
+
+export class CurrentBalance extends ProjectionBase implements IHaveBalance {
 
     private balance: number = 0;
     public get Balance(): number {
