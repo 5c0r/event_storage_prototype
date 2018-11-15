@@ -37,20 +37,43 @@ export class BankAccountRepository implements IReadBankAccount, IWriteBankAccoun
 
         return streamId;
     }
-
-    createBankAccount(): ObjectId {
-        const newAccountAggregate = new BankAccount({ accountName: 'Test', startBalance: 100000 });
+    // Start of IWriteBankAccount
+    createBankAccount(name: string, amount: number): ObjectId {
+        const newAccountAggregate = new BankAccount({ accountName: name, startBalance: amount });
         const streamId = this.eventStore.startStream(newAccountAggregate);
 
         return streamId;
     }
 
-    createBankAccountWithEvents(): ObjectId {
-        const newAccountEvent = new AccountCreated('Test Account', 100000, new Date());
+    createBankAccountWithEvents(name: string, amount: number): ObjectId {
+        const newAccountEvent = new AccountCreated(name, amount, new Date());
         const streamId = this.eventStore.startStreamWithEvents([newAccountEvent]);
 
         return streamId;
     }
+
+    depositAccount(accountId: any, amount: number): void {
+        const depositEvent = new AccountDeposited(amount);
+        this.eventStore.appendStream(accountId, depositEvent);
+    }
+    withdrawAccount(accountId: any, amount: number): void {
+        const withdrawEvent = new AccountWithdrawed(amount);
+        this.eventStore.appendStream(accountId, withdrawEvent);
+    }
+    transferMoney(fromAccount: any, toAccount: any, amount: number): void {
+        this.withdrawAccount(fromAccount, amount);
+        this.depositAccount(toAccount, amount);
+    }
+
+    // TODO
+    deactivateAccount(accountId: any, reason: string): void {
+
+    }
+    activateAccount(accountId: any, reason: string): void {
+
+    }
+    // End of IWriteBankAccount implementation
+
 
     getBankTransactionEvents(streamId: string): any {
         const results = this.eventStore.getEventsByTypes(streamId, [AccountDeposited.name, AccountWithdrawed.name])

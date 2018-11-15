@@ -1,20 +1,28 @@
-import { ProjectionBase } from '../../../../src/infrastructure/interface/stream-state-base';
+import { ProjectionBase, StreamStateBase } from '../../../../src/infrastructure/interface/stream-state-base';
 import { AccountCreated, AccountDeposited, AccountWithdrawed } from '../bank-account-events';
+import { prop, Typegoose } from 'typegoose';
 
-export interface IHaveBalance {
+interface IHaveBalance {
     Balance: number;
 }
 
-export class CurrentBalance extends ProjectionBase implements IHaveBalance {
+class CurrentBalance extends ProjectionBase implements Typegoose, IHaveBalance {
 
     private balance: number = 0;
+
+    @prop({})
     public get Balance(): number {
         return this.balance;
     }
 
-    constructor(streamId: any) {
-        super(streamId);
+    constructor() {
+        super();
+        // super();
         this.WireUpEvents();
+    }
+
+    public setStreamId(streamId: any): void {
+        this.StreamId = streamId;
     }
 
     // I only cares about AccountCreated, AccountDeposited, AccountWithdrawed
@@ -38,3 +46,7 @@ export class CurrentBalance extends ProjectionBase implements IHaveBalance {
     }
     // End of appliers
 }
+
+const CurrentBalanceSchema = new CurrentBalance().getModelForClass(CurrentBalance);
+
+export { IHaveBalance, CurrentBalance, CurrentBalanceSchema };

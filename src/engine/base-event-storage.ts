@@ -69,7 +69,6 @@ export class EventStorage<T1 extends AggregateBase> implements IWorkWithEvent<T1
         }
     }
 
-
     private fromEvents(events: IAmEvent[], streamId: any, actionId: number, start?: number): AggregateEventDbSchema[] {
         return events.map((ev: IAmEvent, index) => this.fromEvent(streamId, ev, (start || 1) + index, actionId));
     }
@@ -184,6 +183,16 @@ export class EventStorage<T1 extends AggregateBase> implements IWorkWithEvent<T1
             if (version && res.length !== version) {
                 throw new Error(`Invalid stream, Looking for version ${version} but only found ${res.length} events`);
             }
+            return res;
+        }));
+    }
+
+    public getEventsFromVersion(streamId: string, fromVersion?: number): Observable<IAmEvent[]> {
+        let query = EventModel.find({ StreamId: streamId });
+
+        query = fromVersion ? query.where('Version').gte(fromVersion) : query;
+
+        return fromPromise(query.sort({ Version: 1 }).then(res => {
             return res;
         }));
     }

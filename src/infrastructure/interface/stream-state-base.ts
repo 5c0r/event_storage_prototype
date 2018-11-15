@@ -1,17 +1,19 @@
 import { AggreateStreamState } from './aggregate';
 import { ApplyEvent, IAmEvent } from './event';
 import { EventRouter } from './aggregate-base';
+import { prop, Typegoose } from 'typegoose';
 
-export class StreamStateBase implements AggreateStreamState {
-    StreamId: any;
-    CurrentVersion: number;
+export class StreamStateBase extends Typegoose implements AggreateStreamState {
 
+    @prop({}) StreamId: any;
+
+    @prop({}) CurrentVersion: number;
 
     constructor(streamId?: any, version?: number) {
+        super();
         this.StreamId = streamId || null;
         this.CurrentVersion = version || 1;
     }
-
 }
 
 export abstract class ProjectionBase extends StreamStateBase {
