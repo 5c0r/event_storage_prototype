@@ -6,9 +6,9 @@ export class CommandHandler {
     readonly bankWriteSvc: IWriteBankAccount;
 
     readonly commandRouter = {
-        'CreateAccount': this.createBankAccount,
-        'DepositAccount': this.depositBankAccount,
-        'TransferAccount': this.transferBankAccount,
+        'CreateCommand': this.createBankAccount,
+        'DepositCommand': this.depositBankAccount,
+        'TransferCommand': this.transferBankAccount,
     }
     constructor() {
         this.bankWriteSvc = new BankAccountRepository();
