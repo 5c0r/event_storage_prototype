@@ -4,15 +4,14 @@ import { BankAccount } from '../model';
 import { ObjectId } from 'bson';
 import { MongooseInstance, BaseMongooseInstance } from '../../../src/infrastructure/interface/storage/mongo-instance';
 import { EventStorage } from '../../../src';
-import { CreateBankAccountHandler } from 'src/component/handler/create-bank-account';
-import { AccountCreated, AccountDeposited, AccountWithdrawed } from 'src/model/bank-account-events';
-import * as Mongoose from 'mongoose';
-import { fromPromise } from 'rxjs/internal-compatibility';
-import { AccountTotalDeposit } from 'src/model/projection/total-deposit';
-import { CurrentBalance } from 'src/model/projection/current-balance';
+import { AccountCreated, AccountDeposited, AccountWithdrawed } from './../model/bank-account-events';
+import { AccountTotalDeposit } from './../model/projection/total-deposit';
+import { Service } from 'typedi';
+import { CurrentBalance } from './../model/projection/current-balance';
 
 const connString = 'mongodb://127.0.0.1:27017/event_storage';
 
+@Service()
 export class BankAccountRepository implements IReadBankAccount, IWriteBankAccount {
 
     private readonly mongooseInstance: MongooseInstance = new BaseMongooseInstance(connString);
@@ -54,11 +53,11 @@ export class BankAccountRepository implements IReadBankAccount, IWriteBankAccoun
 
     depositAccount(accountId: any, amount: number): void {
         const depositEvent = new AccountDeposited(amount);
-        this.eventStore.appendStream(accountId, depositEvent);
+        this.eventStore.appendStream(accountId, [depositEvent]);
     }
     withdrawAccount(accountId: any, amount: number): void {
         const withdrawEvent = new AccountWithdrawed(amount);
-        this.eventStore.appendStream(accountId, withdrawEvent);
+        this.eventStore.appendStream(accountId, [withdrawEvent]);
     }
     transferMoney(fromAccount: any, toAccount: any, amount: number): void {
         this.withdrawAccount(fromAccount, amount);
@@ -86,18 +85,24 @@ export class BankAccountRepository implements IReadBankAccount, IWriteBankAccoun
         const events = await this.eventStore.getEvents(userId).toPromise();
 
         const depositProjection = new AccountTotalDeposit(userId);
-        events.forEach(ev => depositProjection.ApplyEvent(ev));
+        events.forEach(ev => {
+            depositProjection.ApplyEvent(ev)
+        });
 
         return depositProjection;
     }
 
-    async getBankCurrentBalanceProjection(userId: string) {
+    async getBankCurrentBalanceProjection(userId: string): Promise<CurrentBalance> {
         const events = await this.eventStore.getEvents(userId).toPromise();
 
         const currentBalance = new CurrentBalance(userId);
-        events.forEach(ev => currentBalance.ApplyEvent(ev));
-
-        return currentBalance;
+        events.forEach((ev: any) => {
+            console.log('applying event', ev.Data, ev.Type);
+            if (ev) {
+                currentBalance.ApplyEvent(ev.Data, ev.Type)
+            };
+        });
+        return Promise.resolve(currentBalance);
     }
 
     getAggregate(streamId: any) {
@@ -117,12 +122,6 @@ export class BankAccountRepository implements IReadBankAccount, IWriteBankAccoun
     // Don't use this
     appendAggregate(streamId: any) {
         console.log('getting stream to append streamId', streamId);
-        const stream$ = this.eventStore.getStream(streamId).subscribe((res) => {
-            res.setName('Hello guys');
-            res.deposit(10);
-
-            this.eventStore.saveStream(res);
-        })
     }
 
 }

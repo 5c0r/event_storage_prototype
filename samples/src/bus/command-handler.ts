@@ -1,17 +1,23 @@
-import { IWriteBankAccount } from 'src/services';
-import { BankAccountRepository } from 'src/services/bank-repository';
+import { IWriteBankAccount } from './../services/write.interface';
+import { BankAccountRepository } from './../services/bank-repository';
 import { CreateCommand, DepositCommand, TransferCommand } from './interface/command.interface';
+import { Service } from 'typedi';
 
-export class CommandHandler {
-    readonly bankWriteSvc: IWriteBankAccount;
+@Service()
+export class ReadCommandHandler {
+
+    // Make sure we don't use any read method here
+    bankWriteSvc: IWriteBankAccount;
 
     readonly commandRouter = {
-        'CreateCommand': this.createBankAccount,
-        'DepositCommand': this.depositBankAccount,
-        'TransferCommand': this.transferBankAccount,
+        'CreateCommand': this.createBankAccount.bind(this),
+        'DepositCommand': this.depositBankAccount.bind(this),
+        'TransferCommand': this.transferBankAccount.bind(this),
     }
-    constructor() {
-        this.bankWriteSvc = new BankAccountRepository();
+
+    // Dependency Injection is used
+    constructor(public bankRepo: BankAccountRepository) {
+        this.bankWriteSvc = bankRepo;
     }
 
     private createBankAccount(createCommand: CreateCommand): void {
@@ -28,12 +34,18 @@ export class CommandHandler {
         this.bankWriteSvc.transferMoney(From, To, Amount);
     }
 
-    public dispatchCommand(commandName: string, payload: any): void {
-        const handler = this.commandRouter[commandName];
-        if (handler) {
-            handler(payload);
-        } else {
-            console.error(`No handler found for this command ${commandName}`);
+    public dispatchCommand(command: any): void {
+        try {
+            const handler = this.commandRouter[command.constructor.name];
+
+            if (handler) {
+                handler(command);
+            } else {
+                throw new Error(`No handler found for this command ${command.constructor.name}`);
+            }
+
+        } catch (e) {
+            console.error(`Error occured for handler ${command.constructor.name}`, e);
         }
     }
 }

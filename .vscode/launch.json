@@ -8,6 +8,13 @@
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
+            "preLaunchTask": "npm: compileSample",
+            "program": "${workspaceFolder}/samples/dist/samples/src/app.js"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Program",
             "program": "${file}",
             "outFiles": [
                 "${workspaceRoot}/out/**/*.js"

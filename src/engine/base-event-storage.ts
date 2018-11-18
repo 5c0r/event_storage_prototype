@@ -2,7 +2,7 @@ import { ObjectId } from 'bson';
 import * as Mongoose from 'mongoose';
 import { Observable, of, throwError } from 'rxjs';
 import { fromPromise } from 'rxjs/internal/observable/fromPromise';
-import { map, tap, switchMap } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 import { EventModel } from '../infrastructure/db_schema/event-model';
 import { AggreateStreamState } from '../infrastructure/interface/aggregate';
 import { AggregateBase } from '../infrastructure/interface/aggregate-base';
@@ -18,14 +18,6 @@ declare const emit: Function;
 export class EventStorage<T1 extends AggregateBase> implements IWorkWithEvent<T1> {
 
     constructor(private readonly mongoose: MongooseInstance, private readonly typeConstructor: { new(): T1 }) {
-
-    }
-
-    public startMongo(connString: string): void {
-
-    }
-
-    public startMongoUsingInstance(mongoInstance: MongooseInstance) {
 
     }
 

@@ -1,52 +1,56 @@
 import { ProjectionBase, StreamStateBase } from '../../../../src/infrastructure/interface/stream-state-base';
 import { AccountCreated, AccountDeposited, AccountWithdrawed } from '../bank-account-events';
-import { prop, Typegoose } from 'typegoose';
+// import { prop, Typegoose } from 'typegoose';
 
 interface IHaveBalance {
     Balance: number;
 }
 
-class CurrentBalance extends ProjectionBase implements Typegoose, IHaveBalance {
+interface IHaveName {
+    Name: string;
+}
+
+class CurrentBalance extends ProjectionBase implements IHaveBalance, IHaveName {
 
     private balance: number = 0;
+    private name: string = '';
 
-    @prop({})
     public get Balance(): number {
         return this.balance;
     }
 
-    constructor() {
-        super();
-        // super();
+    public get Name(): string {
+        return this.name;
+    }
+
+    constructor(streamId: any) {
+        super(streamId);
         this.WireUpEvents();
     }
 
-    public setStreamId(streamId: any): void {
-        this.StreamId = streamId;
-    }
-
     // I only cares about AccountCreated, AccountDeposited, AccountWithdrawed
-    public WireUpEvents(): void {
+    private WireUpEvents(): void {
         this.RegisterEvent(AccountCreated, this.accountCreated);
         this.RegisterEvent(AccountDeposited, this.accountDeposited);
         this.RegisterEvent(AccountWithdrawed, this.accountWithdrawed);
     }
 
     // Appliers
-    public accountCreated = (ev: AccountCreated): void => {
+    private accountCreated = (ev: AccountCreated): void => {
         this.balance = ev.startBalance;
+        this.name = ev.name;
     }
 
-    public accountDeposited = (ev: AccountDeposited): void => {
+    private accountDeposited = (ev: AccountDeposited): void => {
         this.balance = this.balance + ev.Value;
     }
 
-    public accountWithdrawed = (ev: AccountWithdrawed): void => {
+    private accountWithdrawed = (ev: AccountWithdrawed): void => {
         this.balance = this.balance - ev.Value;
     }
     // End of appliers
 }
 
-const CurrentBalanceSchema = new CurrentBalance().getModelForClass(CurrentBalance);
+// const CurrentBalanceSchema = new CurrentBalance().getModelForClass(CurrentBalance);
 
-export { IHaveBalance, CurrentBalance, CurrentBalanceSchema };
+export { IHaveBalance, IHaveName, CurrentBalance };

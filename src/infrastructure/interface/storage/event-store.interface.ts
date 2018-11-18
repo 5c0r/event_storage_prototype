@@ -7,12 +7,12 @@ export interface IWorkWithEvent<T extends AggregateRoot> {
 
     startStream(aggregate: T, withEvents?: IAmEvent[]): void;
 
-    appendStream(streamId: AAGUID, events: IAmEvent[], newStream: boolean, expectedVersion?: number): void;
+    appendStream(streamId: any, events: IAmEvent[], newStream: boolean, expectedVersion?: number): void;
     saveStream(aggregate: T);
 
-    getStream(streamId: AAGUID, version?: Number): Observable<T>;
-    getStreamState(streamId: AAGUID): Observable<AggreateStreamState>;
+    getStream(streamId: any, version?: Number): Observable<T>;
+    getStreamState(streamId: any): Observable<AggreateStreamState>;
     getStreamWithMapReduce(streamId: any, version?: number): Observable<T>;
 
-    getEvents(streamId: AAGUID, version?: Number): Observable<IAmEvent[]>;
+    getEvents(streamId: any, version?: Number): Observable<IAmEvent[]>;
 }
