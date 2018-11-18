@@ -2,13 +2,13 @@ import { EventBase } from '../../../src/infrastructure/interface/event-base';
 
 // Sample aggregate creation
 export class AccountDeposited extends EventBase {
-    constructor(public Value: number) {
+    constructor(public Value: number, public Reason?: string) {
         super();
     }
 }
 
 export class AccountWithdrawed extends EventBase {
-    constructor(public Value: number) {
+    constructor(public Value: number, public Reason?: string) {
         super();
     }
 }

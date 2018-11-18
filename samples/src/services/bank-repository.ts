@@ -8,6 +8,7 @@ import { AccountCreated, AccountDeposited, AccountWithdrawed } from './../model/
 import { AccountTotalDeposit } from './../model/projection/total-deposit';
 import { Service } from 'typedi';
 import { CurrentBalance } from './../model/projection/current-balance';
+import { TransactionHistory } from './../model/projection/transaction-history';
 
 const connString = 'mongodb://127.0.0.1:27017/event_storage';
 
@@ -36,9 +37,11 @@ export class BankAccountRepository implements IReadBankAccount, IWriteBankAccoun
 
         return streamId;
     }
+
     // Start of IWriteBankAccount
     createBankAccount(name: string, amount: number): ObjectId {
-        const newAccountAggregate = new BankAccount({ accountName: name, startBalance: amount });
+        const newAccountAggregate = new BankAccount();
+        newAccountAggregate.createBankAccount(name, amount);
         const streamId = this.eventStore.startStream(newAccountAggregate);
 
         return streamId;
@@ -51,17 +54,20 @@ export class BankAccountRepository implements IReadBankAccount, IWriteBankAccoun
         return streamId;
     }
 
-    depositAccount(accountId: any, amount: number): void {
-        const depositEvent = new AccountDeposited(amount);
+    depositAccount(accountId: any, amount: number, reason?: string): void {
+        const depositEvent = new AccountDeposited(amount, reason);
         this.eventStore.appendStream(accountId, [depositEvent]);
     }
-    withdrawAccount(accountId: any, amount: number): void {
-        const withdrawEvent = new AccountWithdrawed(amount);
+
+    withdrawAccount(accountId: any, amount: number, reason?: string): void {
+        const withdrawEvent = new AccountWithdrawed(amount, reason);
         this.eventStore.appendStream(accountId, [withdrawEvent]);
     }
+
     transferMoney(fromAccount: any, toAccount: any, amount: number): void {
-        this.withdrawAccount(fromAccount, amount);
-        this.depositAccount(toAccount, amount);
+        const reason = `Transfer from ${amount} euros ${fromAccount} to ${toAccount}`;
+        this.withdrawAccount(fromAccount, amount, reason);
+        this.depositAccount(toAccount, amount, reason);
     }
 
     // TODO
@@ -73,12 +79,20 @@ export class BankAccountRepository implements IReadBankAccount, IWriteBankAccoun
     }
     // End of IWriteBankAccount implementation
 
-
     getBankTransactionEvents(streamId: string): any {
         const results = this.eventStore.getEventsByTypes(streamId, [AccountDeposited.name, AccountWithdrawed.name])
             .toPromise();
 
         return results;
+    }
+
+    async getBankTransactionProjection(userId: string): Promise<any> {
+        const events = await this.eventStore.getEvents(userId).toPromise();
+
+        const transactionProjection = new TransactionHistory(userId);
+        events.forEach((ev: any) => transactionProjection.ApplyEvent(ev.Data, ev.Type));
+
+        return transactionProjection;
     }
 
     async getBankTotalDepositProjection(userId: string) {

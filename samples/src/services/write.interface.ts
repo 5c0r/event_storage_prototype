@@ -1,4 +1,4 @@
-import { ObjectId } from "bson";
+import { ObjectId } from 'bson';
 
 export interface IWriteBankAccount {
     createBankAccount(name: string, amount: number): ObjectId;

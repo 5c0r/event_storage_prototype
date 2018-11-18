@@ -1,31 +1,45 @@
-import { AccountCreated, AccountDeposited, AccountWithdrawed, NameSet } from './bank-account-events';
+import { AccountCreated, AccountDeposited, AccountWithdrawed, NameSet, AccountDeactivated, AccountActivated } from './bank-account-events';
 import { AggregateBase } from '../../../src/infrastructure/interface/aggregate-base';
 
 export interface IBankAccount {
-    accountName: string;
-    startBalance?: number;
+    AccountName: string;
+    Balance: number;
+    Active: boolean;
+    CreationDate: Date;
+}
+
+export class BankAccountResponse implements IBankAccount {
+
+    static FromProjection(projection: BankAccount): BankAccountResponse {
+        return new BankAccountResponse(
+            projection.AccountName, projection.Balance,
+            projection.Active, projection.CreationDate);
+    }
+    constructor(public readonly AccountName: string, public readonly Balance: number,
+        public readonly Active: boolean, public readonly CreationDate: Date) { }
+
+
 }
 
 // Stream of Events
-export class BankAccount extends AggregateBase {
+export class BankAccount extends AggregateBase implements IBankAccount {
 
     private balance: number = 0;
     private accountHolder: string = '';
     private creationDate: Date;
+    private active: boolean = false;
 
-    constructor(obj?: IBankAccount) {
+    constructor() {
         super();
         this.WireUpEvents();
-
-        if (obj) { this.createBankAccount(obj.accountName, obj.startBalance); }
     }
 
-    private createBankAccount(name: string, startBalance: number): void {
+    public createBankAccount(name: string, startBalance: number): void {
         if (name === '') {
             throw new Error('Invalid name input provided !');
         }
 
-        if (startBalance < 0 ) {
+        if (startBalance < 0) {
             throw new Error(`Cannot input negative starting balance !`);
         }
 
@@ -40,11 +54,15 @@ export class BankAccount extends AggregateBase {
     }
 
     // Getters
-    public get CurrentBalance(): number {
+    public get Balance(): number {
         return this.balance;
     }
-    public get AccountHolderName(): string {
+    public get AccountName(): string {
         return this.accountHolder;
+    }
+
+    public get Active(): boolean {
+        return this.active;
     }
 
     public get CreationDate(): Date {
@@ -80,6 +98,7 @@ export class BankAccount extends AggregateBase {
     // Appliers
     public accountCreated = (ev: AccountCreated): void => {
         this.accountHolder = ev.name;
+        this.active = true;
         this.balance = ev.startBalance;
     }
 
@@ -93,6 +112,14 @@ export class BankAccount extends AggregateBase {
 
     public accountWithdrawed = (ev: AccountWithdrawed): void => {
         this.balance = this.balance - ev.Value;
+    }
+
+    public accountDeactivated = (ev: AccountDeactivated): void => {
+        this.active = false;
+    }
+
+    public accountActivated = (ev: AccountActivated): void => {
+        this.active = true;
     }
     // End of appliers
 }

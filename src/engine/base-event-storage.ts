@@ -95,8 +95,6 @@ export class EventStorage<T1 extends AggregateBase> implements IWorkWithEvent<T1
                         const innerExpectedVersion: number = expectedVersion || (state.CurrentVersion + events.length);
                         const outerExpectedVersion: number = state.CurrentVersion + events.length;
 
-                        // console.log('outerExpected', state, state.CurrentVersion, events.length);
-
                         if (innerExpectedVersion !== outerExpectedVersion) {
                             throw new Error('Stream version mismatch !');
                         }

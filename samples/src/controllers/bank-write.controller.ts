@@ -22,9 +22,9 @@ export class BankWriteController {
         return null;
     }
 
-    @Post('/account/deposit')
-    deposit(@Body() depositPayload: DepositPayload): Promise<any> {
-        const command = new DepositCommand(depositPayload.Account, depositPayload.Amount);
+    @Post('/account/deposit/:id')
+    deposit(@Param('id') id: string, @Body() depositPayload: DepositPayload): Promise<any> {
+        const command = new DepositCommand(id, depositPayload.Amount);
         this.handler.dispatchCommand(command);
 
         return null;

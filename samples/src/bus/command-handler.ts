@@ -26,11 +26,14 @@ export class ReadCommandHandler {
 
     private depositBankAccount(depositCommand: DepositCommand): void {
         const { Account, Amount } = depositCommand.payload;
+        if (Amount < 0) { throw new Error('Deposit amount must be greater than 0'); }
         this.bankWriteSvc.depositAccount(Account, Amount);
     }
 
     private transferBankAccount(transferCommand: TransferCommand): void {
         const { From, To, Amount } = transferCommand.payload;
+        if (Amount < 0) { throw new Error('Withdraw amount must be greater than 0'); }
+
         this.bankWriteSvc.transferMoney(From, To, Amount);
     }
 
