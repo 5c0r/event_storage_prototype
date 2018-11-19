@@ -31,7 +31,8 @@ export class BankWriteController {
 
     @Post('/transfer')
     transfer(@Body() transferPayload: TransferPayload): Promise<any> {
-        const command = new TransferCommand(transferPayload.From, transferPayload.To, transferPayload.Amount);
+        const command = new TransferCommand(transferPayload.From, transferPayload.To,
+            transferPayload.Amount);
         this.handler.dispatchCommand(command);
 
         return null;

@@ -52,7 +52,10 @@ export class TransactionHistory extends ProjectionBase implements IAmTransaction
     // Appliers
     private accountCreated = (ev: AccountCreated): void => {
         this.Name = ev.name;
-        this.addToHistory({ Type: TransactionType.Deposit, Amount: ev.startBalance, Description: 'First transaction' });
+        this.addToHistory({
+            Type: TransactionType.Deposit, Amount: ev.startBalance,
+            Description: 'First transaction'
+        });
     }
 
     private accountDeposited = (ev: AccountDeposited): void => {

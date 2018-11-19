@@ -9,7 +9,6 @@ export class StreamStateBase implements AggreateStreamState {
     CurrentVersion: number;
 
     constructor(streamId?: any, version?: number) {
-        super();
         this.StreamId = streamId || null;
         this.CurrentVersion = version || 1;
     }

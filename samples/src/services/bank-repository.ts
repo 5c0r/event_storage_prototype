@@ -86,7 +86,7 @@ export class BankAccountRepository implements IReadBankAccount, IWriteBankAccoun
         return results;
     }
 
-    async getBankTransactionProjection(userId: string): Promise<any> {
+    async getBankTransactionProjection(userId: string): Promise<TransactionHistory> {
         const events = await this.eventStore.getEvents(userId).toPromise();
 
         const transactionProjection = new TransactionHistory(userId);
@@ -95,7 +95,7 @@ export class BankAccountRepository implements IReadBankAccount, IWriteBankAccoun
         return transactionProjection;
     }
 
-    async getBankTotalDepositProjection(userId: string) {
+    async getBankTotalDepositProjection(userId: string): Promise<AccountTotalDeposit> {
         const events = await this.eventStore.getEvents(userId).toPromise();
 
         const depositProjection = new AccountTotalDeposit(userId);
@@ -111,7 +111,6 @@ export class BankAccountRepository implements IReadBankAccount, IWriteBankAccoun
 
         const currentBalance = new CurrentBalance(userId);
         events.forEach((ev: any) => {
-            console.log('applying event', ev.Data, ev.Type);
             if (ev) {
                 currentBalance.ApplyEvent(ev.Data, ev.Type)
             };
