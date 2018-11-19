@@ -1,6 +1,6 @@
-import { JsonController, Get, Post, Param, Delete, Body, HttpCode } from 'routing-controllers';
+import { JsonController, Post, Param, Body } from 'routing-controllers';
 import { Service } from 'typedi';
-import { ReadCommandHandler } from './../bus/command-handler';
+import { WriteCommandHandler } from './../bus/command-handler';
 import {
     CreateCommand, CreatePayload,
     DepositCommand, DepositPayload, TransferPayload, TransferCommand
@@ -9,13 +9,12 @@ import {
 @Service()
 @JsonController()
 export class BankWriteController {
-    constructor(private handler: ReadCommandHandler) {
+    constructor(private handler: WriteCommandHandler) {
 
     }
 
     @Post('/account')
     create(@Body() createPayload: CreatePayload): Promise<any> {
-        console.log('postBody', createPayload);
         const command = new CreateCommand(createPayload.Name, createPayload.Amount);
         this.handler.dispatchCommand(command);
 

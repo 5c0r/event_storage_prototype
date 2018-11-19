@@ -4,7 +4,7 @@ import { CreateCommand, DepositCommand, TransferCommand } from './interface/comm
 import { Service } from 'typedi';
 
 @Service()
-export class ReadCommandHandler {
+export class WriteCommandHandler {
 
     // Make sure we don't use any read method here
     bankWriteSvc: IWriteBankAccount;
@@ -21,7 +21,10 @@ export class ReadCommandHandler {
     }
 
     private createBankAccount(createCommand: CreateCommand): void {
-        this.bankWriteSvc.createBankAccount(createCommand.payload.Name, createCommand.payload.Amount);
+        this.bankWriteSvc.createBankAccount(
+            createCommand.payload.Name,
+            createCommand.payload.Amount
+        );
     }
 
     private depositBankAccount(depositCommand: DepositCommand): void {

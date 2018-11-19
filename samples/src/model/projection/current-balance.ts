@@ -1,6 +1,6 @@
 import { ProjectionBase, StreamStateBase } from '../../../../src/infrastructure/interface/stream-state-base';
 import { AccountCreated, AccountDeposited, AccountWithdrawed } from '../bank-account-events';
-// import { prop, Typegoose } from 'typegoose';
+
 
 interface IHaveBalance {
     Balance: number;
